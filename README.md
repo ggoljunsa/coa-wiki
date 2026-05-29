@@ -2,7 +2,7 @@
 
 DGIST Computer Organization and Architecture (COA) 기말고사 범위를 나무위키 스타일로 정리한 단일 페이지 위키.
 
-**라이브 데모**: https://ggw.github.io/coa-wiki/
+**라이브 데모**: https://ggoljunsa.github.io/coa-wiki/
 
 ## 시험 정보
 
