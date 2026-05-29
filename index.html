@@ -1,0 +1,3760 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>컴구위키 — Computer Organization Wiki</title>
+<style>
+  :root {
+    --bg: #f5f5f5;
+    --paper: #ffffff;
+    --text: #222;
+    --muted: #777;
+    --link: #1d65b3;
+    --link-visited: #6a4fa3;
+    --header: #2a3b5a;
+    --header-text: #fff;
+    --border: #d8d8d8;
+    --code-bg: #f3f3f3;
+    --info-bg: #fff8d8;
+    --info-border: #e0c060;
+    --warn-bg: #ffe9e9;
+    --warn-border: #d68080;
+    --tip-bg: #e8f3ff;
+    --tip-border: #80a8d6;
+    --table-head: #ecf0f6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+  header.top {
+    background: var(--header);
+    color: var(--header-text);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 3px solid #1c2840;
+  }
+  header.top .logo {
+    font-weight: 700;
+    font-size: 18px;
+    cursor: pointer;
+    color: #fff;
+    text-decoration: none;
+  }
+  header.top .logo span { color: #ffd75e; }
+  header.top .search {
+    flex: 1;
+    max-width: 420px;
+  }
+  header.top .search input {
+    width: 100%;
+    padding: 6px 10px;
+    border-radius: 3px;
+    border: 1px solid #1c2840;
+    background: #fff;
+    color: #222;
+    font-size: 14px;
+  }
+  header.top .tagline {
+    margin-left: auto;
+    color: #c8d4e6;
+    font-size: 12px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 220px 1fr 220px;
+    gap: 18px;
+    max-width: 1280px;
+    margin: 16px auto;
+    padding: 0 16px;
+  }
+  @media (max-width: 1100px) {
+    .layout { grid-template-columns: 200px 1fr; }
+    .toc-side { display: none; }
+  }
+  @media (max-width: 720px) {
+    .layout { grid-template-columns: 1fr; }
+    .nav-side { display: none; }
+  }
+
+  aside.nav-side, aside.toc-side {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px;
+    font-size: 13px;
+    align-self: start;
+    position: sticky;
+    top: 70px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+  aside h3 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+  }
+  aside ul { list-style: none; padding: 0; margin: 0; }
+  aside ul li { padding: 3px 0; }
+  aside ul li a {
+    color: var(--link);
+    text-decoration: none;
+    display: block;
+    padding: 2px 4px;
+    border-radius: 3px;
+  }
+  aside ul li a:hover {
+    background: #f0f4fa;
+    text-decoration: underline;
+  }
+  aside ul li a.active {
+    background: var(--header);
+    color: #fff;
+    font-weight: 600;
+  }
+  aside .cat {
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 10px;
+  }
+  aside.toc-side .toc-item { padding-left: 0; }
+  aside.toc-side .toc-item.l2 { padding-left: 12px; }
+  aside.toc-side .toc-item.l3 { padding-left: 24px; }
+  aside.toc-side .toc-item a { font-size: 12px; }
+
+  main.article {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px 32px 60px;
+    min-height: 70vh;
+  }
+  main h1 {
+    margin: 0 0 4px;
+    font-size: 28px;
+    border-bottom: 2px solid var(--header);
+    padding-bottom: 8px;
+  }
+  main .meta {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 18px;
+  }
+  main h2 {
+    margin-top: 28px;
+    font-size: 20px;
+    background: #f0f4fa;
+    padding: 6px 10px;
+    border-left: 4px solid var(--header);
+  }
+  main h3 {
+    margin-top: 18px;
+    font-size: 16px;
+    color: #34466b;
+    border-bottom: 1px dashed #ccc;
+    padding-bottom: 4px;
+  }
+  main h4 {
+    margin-top: 14px;
+    font-size: 14px;
+    color: #34466b;
+  }
+  main p { margin: 8px 0; }
+  main a { color: var(--link); text-decoration: none; }
+  main a:hover { text-decoration: underline; }
+  main a.wiki { font-weight: 500; }
+  main a.wiki-stub { color: #888; font-style: italic; }
+  main ul, main ol { padding-left: 22px; }
+  main li { margin: 3px 0; }
+
+  main code {
+    background: var(--code-bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+  }
+  main pre {
+    background: #2b2b2b;
+    color: #d0d4d8;
+    padding: 12px 14px;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  main pre.ascii {
+    background: #f8f8f4;
+    color: #222;
+    border: 1px solid var(--border);
+  }
+
+  main table {
+    border-collapse: collapse;
+    margin: 10px 0;
+    width: 100%;
+    font-size: 14px;
+  }
+  main table th, main table td {
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  main table th { background: var(--table-head); font-weight: 600; }
+
+  .info, .warn, .tip {
+    border-left: 4px solid;
+    padding: 10px 14px;
+    margin: 12px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 14px;
+  }
+  .info { background: var(--info-bg); border-color: var(--info-border); }
+  .warn { background: var(--warn-bg); border-color: var(--warn-border); }
+  .tip  { background: var(--tip-bg);  border-color: var(--tip-border); }
+  .info::before { content: "📝 참고  "; font-weight: 700; }
+  .warn::before { content: "⚠ 주의  "; font-weight: 700; }
+  .tip::before  { content: "💡 팁  "; font-weight: 700; }
+
+  .joke {
+    background: #f5e8ff;
+    border-left: 4px solid #a466d6;
+    padding: 8px 14px;
+    margin: 12px 0;
+    font-size: 13px;
+    color: #555;
+    border-radius: 0 4px 4px 0;
+  }
+  .joke::before { content: "💬 여담  "; font-weight: 700; color: #7440a8; }
+
+  .footnote {
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    margin-top: 24px;
+  }
+  .footnote-ref {
+    font-size: 10px;
+    vertical-align: super;
+    color: var(--link);
+    cursor: pointer;
+  }
+
+  .categories {
+    margin-top: 30px;
+    padding-top: 14px;
+    border-top: 2px solid var(--border);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .categories .cat-tag {
+    display: inline-block;
+    background: #e8e8e8;
+    color: #444;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-right: 6px;
+    font-size: 12px;
+  }
+
+  /* Diagram styles */
+  .diagram {
+    background: #fafafa;
+    border: 1px solid var(--border);
+    padding: 10px;
+    margin: 12px 0;
+    text-align: center;
+    border-radius: 4px;
+  }
+  .diagram .caption {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 6px;
+  }
+  figure.pdf-img {
+    margin: 16px auto;
+    text-align: center;
+    background: #fafafa;
+    border: 1px solid var(--border);
+    padding: 12px;
+    border-radius: 4px;
+    max-width: 100%;
+  }
+  figure.pdf-img img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+    background: white;
+  }
+  figure.pdf-img figcaption {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 8px;
+    font-style: italic;
+  }
+  figure.pdf-img.small img { max-width: 400px; }
+  figure.pdf-img.medium img { max-width: 600px; }
+  figure.pdf-img.large img { max-width: 850px; }
+
+  /* Stub style */
+  .stub-banner {
+    background: #fff3cd;
+    border: 1px dashed #d4a017;
+    padding: 8px 12px;
+    color: #6a5000;
+    font-size: 13px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+
+  .breadcrumb {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+  .breadcrumb a { color: var(--link); text-decoration: none; }
+
+  footer.page {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    padding: 20px;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="logo" href="#main">컴구<span>위키</span></a>
+  <div class="search">
+    <input id="searchBox" type="text" placeholder="문서 검색... (예: TLB, ROB, MSI)">
+  </div>
+  <div class="tagline">DGIST Computer Organization Final Exam — 2026-06-09</div>
+</header>
+
+<div class="layout">
+
+  <aside class="nav-side">
+    <h3>📚 문서 목록</h3>
+    <ul id="navList"></ul>
+    <div class="cat">
+      <h3 style="margin-top:14px;">🏷️ 분류</h3>
+      <div>· ISA</div>
+      <div>· 파이프라인</div>
+      <div>· 메모리 시스템</div>
+      <div>· 병렬성</div>
+    </div>
+  </aside>
+
+  <main class="article" id="articleArea">
+    <!-- rendered here -->
+  </main>
+
+  <aside class="toc-side" id="tocArea">
+    <h3>📑 목차</h3>
+    <ul id="tocList"></ul>
+  </aside>
+
+</div>
+
+<footer class="page">
+  컴구위키 · 2026 1학기 기말 대비 · made with ❤️ during boredom
+</footer>
+
+<script>
+// ============================================================
+// 컴구위키 — Computer Organization Wiki
+// 단일 HTML, JS 객체에 마크다운 비슷한 문법으로 글 저장
+// ============================================================
+
+const ARTICLES = {
+
+// ----------------------------------------------------------------
+"main": {
+  title: "컴구위키:대문",
+  category: ["메인"],
+  body: `
+'''컴구위키'''에 오신 것을 환영합니다. 이 위키는 [[DGIST]] 컴퓨터 구조(COA, Computer Organization and Architecture) 기말고사 범위를 [[나무위키]] 스타일로 정리한 문서 모음이다. 시험은 '''2026년 6월 9일 (월) 13:00''' E7 236호에서 치러진다.
+
+{tip}이 위키는 학생이 공부하다 지루할 때 읽으라고 만들어진 문서이다. 따라서 일반 교과서보다 약간의 잡담과 농담이 섞여 있을 수 있다.{/tip}
+
+== 빠른 시작 ==
+
+처음 방문한 독자는 아래 순서대로 읽으면 시험 범위 흐름이 잡힌다:
+
+# [[성능 지표]] — 모든 것의 시작. [[CPI]]/[[IPC]]/[[MIPS]], AM/GM/HM
+# [[MIPS]] — 명령어 포맷, 함수 호출 규약
+# [[파이프라인 예외]] — Precise exception, vectored interrupt
+# [[비순차 실행]] — OoO, [[슈퍼스칼라]], [[ROB]]/[[ISQ]]
+# [[멀티스레딩]] — FGMT/CGMT/SMT/[[VLIW]]
+# [[캐시]] — 매핑, 정책, MSHR, [[MSI 프로토콜|MSI]]
+# [[가상 메모리]] — Paging, [[TLB]], [[PIPT]]/[[VIVT]]/[[VIPT]]
+# [[ch13 IO]] — PIO/[[MMIO]], [[DMA]]/[[IOMMU]], [[Doorbell]], [[AMBA]] ⭐ NEW
+
+== 분류별 문서 ==
+
+=== ISA 계열 ===
+* [[MIPS]]
+* [[명령어 포맷]]
+* [[함수 호출 규약]]
+* [[Branch 주소 계산]]
+* [[Jump 주소 계산]]
+
+=== 파이프라인 ===
+* [[파이프라인 예외]]
+* [[비순차 실행]]
+* [[Load-Use 해저드]]
+* [[데이터 해저드]]
+* [[Forwarding]]
+* [[ROB]] / [[ISQ]] / [[LSQ]]
+
+=== 메모리 시스템 ===
+* [[캐시]]
+* [[가상 메모리]]
+* [[TLB]] / [[MMU]]
+* [[MSI 프로토콜]] / [[MESI]]
+* [[Page Fault]] / [[Demand paging]]
+* [[PIPT]] / [[VIVT]] / [[VIPT]]
+
+=== 병렬성 ===
+* [[멀티스레딩]] / [[하이퍼스레딩]]
+* [[VLIW]]
+* [[ILP와 TLP]] / [[ILP]] / [[TLP]]
+* [[CMP]]
+
+=== IO (ch13) ⭐ NEW ===
+* [[ch13 IO]]
+* [[MMIO]] / [[PIO]] / [[mmap]]
+* [[DMA]] / [[IOMMU]]
+* [[Doorbell]] / [[IRQ]]
+* [[AMBA]] / [[SoC]]
+
+== 시험 정보 ==
+
+{| class="table"
+! 항목 || 내용
+|-
+| 일시 || 2026-06-09 (월) 13:00 ~ 14:30
+|-
+| 장소 || E7 236호
+|-
+| 형식 || 객관식 사지선다 (정답 1~2개) + 계산 + 손코딩
+|-
+| 계산기 || '''사용 안 함'''
+|-
+| 주의 || 객관식 답은 '''반드시 박스 안에''' 적을 것 (박스 밖이면 0점)
+|}
+
+{warn}박스 밖에 답 적으면 0점. 한 번이라도 시험 보면 가슴 아픈 규칙이다. 조교 김동섭님의 진심 어린 공지였다.{/warn}
+
+{joke}이 위키의 모든 농담은 시험 답안지에 적지 말 것. "MIPS는 학교 졸업하면 만날 일 없으니 미련 없이 보내주자"라고 적으면 점수 0점에 추가로 한숨 1회.{/joke}
+
+== 여담 ==
+
+* 이 위키는 [[Claude]]가 학생의 의뢰로 만든 것이다. 사실관계 오류는 발견 즉시 학생이 시험관에게 항의해도 점수가 되돌아오지 않는다는 점을 유의할 것.
+* 학생이 진짜로 시험에 [[Claude]] 인용을 시도하는 것을 막을 권한은 이 위키에 없다.
+* [[나무위키]]가 그렇듯, 이 위키도 시간이 지나면 문서가 일관성을 잃고 같은 내용이 여러 곳에 산재될 수 있다. 다만 시험까지 2주 남았으므로 그 전에는 폭주하지 않을 예정.
+
+== 같이 보기 ==
+* [[FAQ]]
+* [[자주 틀리는 함정 모음]]
+`
+},
+
+// ----------------------------------------------------------------
+"성능 지표": {
+  title: "성능 지표 (Performance Metrics)",
+  category: ["성능", "RECAP"],
+  body: `
+'''성능 지표'''(Performance Metrics)는 컴퓨터의 빠르기를 측정하는 방법이다. 직관과 실제가 자주 어긋나는 분야이기 때문에, 시험에서는 '''공식부터 적은 다음 대입'''하는 습관이 점수를 만든다.
+
+[[img:perf_metrics-55.png|RECAP에서 다루는 Performance Metrics 챕터 시작 슬라이드|medium]]
+
+== CPU 실행 시간 공식 ==
+
+가장 중요한 단일 공식:
+
+<pre>
+CPU Time = IC × CPI × T_cycle = IC × CPI / f
+</pre>
+
+* '''IC''' (Instruction Count): 실행된 명령어 개수
+* '''CPI''' (Cycles Per Instruction): 명령어 한 개당 평균 사이클
+* '''f''' (Frequency): 클럭 주파수 (= 1 / T_cycle)
+
+{warn}'''CPI가 높을수록 느리다.''' "CPI = 효율이니까 높을수록 좋다"는 직관은 틀렸다. CPI는 명령어 하나에 사이클을 몇 개 쓰는지이므로 높으면 더 오래 걸린다.{/warn}
+
+== Wall Clock Time 분해 ==
+
+<pre>
+Wall clock time = (1/f) × (1/IPC) × IC
+</pre>
+
+각 인자는 다른 영역에서 결정된다:
+
+{| class="table"
+! 인자 || 결정 주체 || 메모
+|-
+| f (frequency) || '''반도체 공정''' || 3~4GHz가 한계인 이유는 [[전력 공식]] 참고
+|-
+| IPC || '''마이크로아키텍처''' || [[비순차 실행|OoO]], [[슈퍼스칼라]] 등 HW 설계
+|-
+| IC || '''ISA + 컴파일러''' || [[MIPS]]는 IC가 보통 많은 편 (CISC 대비)
+|}
+
+{warn}함정 단골: "컴파일러와 ISA가 IPC를 결정한다" → '''거짓'''. IPC는 마이크로아키텍처, IC가 컴파일러/ISA가 결정한다.{/warn}
+
+== 평균의 종류 ==
+
+세 가지 평균을 언제 쓰는지 구분하는 것이 자주 출제된다.
+
+{| class="table"
+! 종류 || 공식 || 언제 쓰나
+|-
+| '''AM''' (산술평균) || (Σxᵢ)/n || 절대값 평균 (예: 실행 시간 평균)
+|-
+| '''GM''' (기하평균) || (∏xᵢ)^(1/n) || '''정규화된 비율''' (예: 1.2×, 0.8× normalized speedup)
+|-
+| '''HM''' (조화평균) || n / Σ(1/xᵢ) || '''rate 지표''' (예: [[IPC]], [[MIPS_rate|MIPS]])
+|}
+
+{tip}외우는 법:<br>
+· '''비율 → GM''' (정규화 결과는 곱셈으로 합성됨)<br>
+· '''rate → HM''' (역수의 합산이 의미 있는 양){/tip}
+
+== 전력 공식 ==
+
+<pre>
+Dynamic Power ∝ C × V² × f
+</pre>
+
+* '''C''': capacitance (회로 구조)
+* '''V''': voltage (제곱 비례)
+* '''f''': frequency ('''1차 비례''')
+
+{warn}함정: "P ∝ f²" → '''거짓'''. 제곱이 붙는 건 voltage이다. 그래서 voltage scaling이 전력 절감에 효과적이고, 클럭만 올리는 건 한계가 있다.{/warn}
+
+== 처리량 vs 응답시간 ==
+
+* '''Latency''' (응답시간): 한 작업이 끝나는 데 걸리는 시간
+* '''Throughput''' (처리량): 단위 시간당 처리되는 작업 수
+
+[[파이프라인]]은 latency는 크게 안 줄이고 throughput을 늘린다. 자동차 공장 비유로 생각하면 된다 — 차 한 대 만드는 시간(latency)은 같아도, 컨베이어 벨트 위에 동시에 여러 대를 올려놓으면 단위 시간당 출고량(throughput)이 늘어난다.
+
+== 같이 보기 ==
+* [[CMP의 정당화]]
+* [[ILP와 TLP]]
+* [[CPI]]
+
+{footnotes}
+[1] 일부 교재에서는 CPI 대신 1/IPC로 표기하기도 한다. 같은 양이다.
+{/footnotes}
+`
+},
+
+// ----------------------------------------------------------------
+"MIPS": {
+  title: "MIPS",
+  category: ["ISA"],
+  body: `
+'''MIPS'''(Microprocessor without Interlocked Pipelined Stages)는 1980년대 [[스탠퍼드 대학교]]의 [[존 헤네시]] 교수가 주도해 설계한 [[RISC]] [[ISA]]이다. 학부 컴퓨터 구조 수업의 사실상 '''표준 교보재'''로, 단순함과 일관성 덕분에 처음 ISA를 배우는 학생에게 친절하다.
+
+{joke}이름이 "[[파이프라인]]을 interlock 없이 처리한다"는 뜻이다. 정작 요즘 MIPS 구현체는 다 interlock 한다. 이름값을 못 한다는 점에서 [[MIPS]]는 [[X11|X Window System]] 같은 면이 있다.{/joke}
+
+== 명령어 포맷 ==
+
+MIPS는 모든 명령어가 '''정확히 32비트'''이며, 형식은 3가지뿐이다.
+
+[[img:mips_format-08.png|MIPS 명령어 포맷 3종 한눈에. R-type/I-type/J-type — 32비트 고정.|large]]
+
+=== R-type (Register) ===
+<pre class="ascii">
+ ┌──────┬──────┬──────┬──────┬──────┬──────┐
+ │  op  │  rs  │  rt  │  rd  │shamt │funct │
+ │ 6bit │ 5bit │ 5bit │ 5bit │ 5bit │ 6bit │
+ └──────┴──────┴──────┴──────┴──────┴──────┘
+</pre>
+
+[[img:mips_rtype-12.png|R-type 슬라이드 원본. ALU 연산이 주로 R-type.|medium]]
+
+* op는 항상 '''0x00''', 실제 동작은 '''funct'''로 결정
+* '''rd''' = destination register (R-type에만 있음)
+* 예: <code>add $rd, $rs, $rt</code>
+
+=== I-type (Immediate) ===
+<pre class="ascii">
+ ┌──────┬──────┬──────┬───────────────────┐
+ │  op  │  rs  │  rt  │     imm16         │
+ │ 6bit │ 5bit │ 5bit │      16bit        │
+ └──────┴──────┴──────┴───────────────────┘
+</pre>
+
+[[img:mips_itype-15.png|I-type 슬라이드 원본. LW/SW/BEQ/ADDI 등이 I-type.|medium]]
+
+* '''rd 필드가 없음''' → destination이 필요한 명령어(LW, ADDI 등)는 '''rt'''를 destination으로 사용
+* 예: <code>lw $rt, imm16($rs)</code> ← rs=base, rt=목적지
+
+{warn}자주 틀리는 함정: <code>lw $7, 8($3)</code>에서 '''$7은 rt 자리이자 destination''', $3은 rs/base이다. "$7이 rd 같다"는 직관은 틀렸다. ([[Load-Use 해저드]] 참고){/warn}
+
+=== J-type (Jump) ===
+<pre class="ascii">
+ ┌──────┬─────────────────────────────────┐
+ │  op  │           imm26                 │
+ │ 6bit │           26bit                 │
+ └──────┴─────────────────────────────────┘
+</pre>
+
+[[img:mips_jtype-18.png|J-type 슬라이드 원본. J/JAL 두 개뿐.|medium]]
+
+* destination register 없음 (단순 점프)
+* 점프 주소 계산: <code>{(PC+4)[31:28], imm26, 2'b00}</code>
+
+== Branch / Jump 주소 계산 ==
+
+=== Branch (BEQ/BNE) ===
+<pre>
+Branch Target = PC + 4 + (sign_extend(imm16) << 2)
+</pre>
+
+핵심 포인트 3가지:
+* 기준은 '''PC가 아니라 PC + 4''' (이미 다음 명령어를 가리키도록 증가된 값)
+* imm16의 단위는 '''명령어 개수''' (byte 아님)
+* <code>&lt;&lt;2</code>로 byte 단위로 변환 (모든 명령어가 4바이트이므로)
+
+범위: <code>±2^15 × 4 = ±128 KB</code>
+
+{warn}음수 offset일 때 +4 잊지 말 것. PC=0x100, imm=-2 → '''PC+4=0x104''' → +(-8) = '''0x0FC''' (0x0F8 아님).{/warn}
+
+=== Jump (J/JAL) ===
+<pre>
+Jump Target = {(PC+4)[31:28], imm26, 2'b00}
+</pre>
+
+* 상위 4비트를 '''PC+4에서''' 가져옴 → 같은 256MB region 내에서만 점프 가능
+* 256MB 경계 넘으려면 [[jr]] $reg 사용
+
+{warn}"J 명령어는 PC 안 보고 imm26만 본다"는 직관은 '''틀렸다'''. PC+4의 상위 4비트가 반드시 합성된다.{/warn}
+
+== sign-extend vs zero-extend ==
+
+immediate를 32비트로 확장할 때 명령어마다 규칙이 다르다.
+
+{| class="table"
+! 명령어 || extension
+|-
+| ADDI, ADDIU, LW, SW, BEQ, BNE || '''sign-extend'''
+|-
+| ANDI, ORI, XORI || '''zero-extend'''
+|}
+
+* <code>ori $t0, $0, 0xFFFF</code> → 결과 '''0x0000FFFF'''
+* <code>addi $t0, $0, 0xFFFF</code> → 결과 '''0xFFFFFFFF''' (= -1)
+
+같은 hex 값으로도 결과가 완전히 다르다.
+
+== 함수 호출 규약 ==
+
+[[함수 호출 규약]] 문서 참고. 요약:
+
+[[img:mips_regtable-35.png|MIPS 레지스터 표 슬라이드 원본 — 외울 때 이 표를 머릿속에 박아두자|large]]
+
+{| class="table"
+! 레지스터 || Saved by || 의미
+|-
+| $a0~$a3 || caller || argument (4개까지)
+|-
+| $v0, $v1 || — || return value
+|-
+| $t0~$t9 || '''caller''' || temporary
+|-
+| $s0~$s7 || '''callee''' || saved register
+|-
+| $sp || callee || stack pointer
+|-
+| $ra || caller || return address
+|}
+
+* '''t = temp (caller가 알아서)''' / '''s = saved (callee가 책임)'''
+* [[Leaf 함수]]는 $ra save 불필요
+
+== 여담 ==
+
+{joke}MIPS는 너무 단순해서 실제 산업에서는 [[ARM]]이나 [[RISC-V]]에 밀려난 지 오래다. 그래도 학부 수업의 영원한 친구. 학교 졸업하고 나면 다시 만날 일 거의 없으니 시험 끝나면 미련 없이 보내주자.{/joke}
+
+== 같이 보기 ==
+* [[명령어 포맷]]
+* [[함수 호출 규약]]
+* [[RISC와 CISC]]
+* [[비트 디코딩]]
+`
+},
+
+// ----------------------------------------------------------------
+"명령어 포맷": {
+  title: "명령어 포맷 (Instruction Formats)",
+  category: ["ISA", "MIPS"],
+  body: `
+[[MIPS]]의 3가지 명령어 포맷에 대한 상세 문서이다. 모두 32비트로 통일되어 있다.
+
+== 비트 디코딩 — 16진수 함정 ==
+
+시험에서 자주 나오는 함정. 다음 명령어를 16진수로 받았다고 하자:
+
+<pre>
+0x00432024
+</pre>
+
+여기서 4, 3, 2를 레지스터 번호로 직접 읽으면 '''틀린다'''. 반드시 2진수로 펼친 후 필드 경계(6/5/5/5/5/6 bit)로 다시 잘라야 한다.
+
+<pre class="ascii">
+0x00432024 = 0000 0000 0100 0011 0010 0000 0010 0100
+              └─op─┘ └─rs─┘ └─rt─┘ └─rd─┘ │shamt└funct┘
+              000000 00010   00011 00100   00000 100100
+              op=0   rs=$2   rt=$3 rd=$4  shamt=0 funct=0x24
+</pre>
+
+→ <code>and $4, $2, $3</code>
+
+{warn}hex digit 경계 (4bit)와 필드 경계 (6/5/5/...)는 일치하지 않는다. hex만 보고 register 번호 찍지 말 것.{/warn}
+
+== R-type 세부 ==
+
+R-type은 항상 <code>op = 0x00</code>이고, funct로 세부 동작을 결정한다. 즉 '''2단계 디코딩'''이 필요하다.
+
+대표적 funct 값:
+* add: 0x20, addu: 0x21
+* sub: 0x22
+* and: 0x24, or: 0x25, xor: 0x26
+* sll: 0x00, srl: 0x02
+* jr: 0x08
+
+{info}시험에서 hex funct 값을 외울 필요는 없다. reference table이 제공된다고 공지된 바 있다.{/info}
+
+=== SLL은 R-type ===
+
+<code>sll $rd, $rt, shamt</code>는 R-type이다. funct field가 있으면 무조건 R-type이며, SLL은 특이하게 '''rs를 안 쓰고 shamt를 사용'''한다.
+
+* rs = 00000 (무시)
+* rt = source
+* rd = destination
+* shamt = shift amount (0~31)
+
+== I-type 세부 ==
+
+I-type은 op 하나로 동작이 결정된다 (funct field 없음).
+
+대표 op 값:
+* lw: 0x23, sw: 0x2B
+* beq: 0x04, bne: 0x05
+* addi: 0x08, addiu: 0x09
+* andi: 0x0C, ori: 0x0D
+* lui: 0x0F
+
+=== rt의 이중 역할 ===
+
+I-type에서 rt는 명령어마다 의미가 다르다:
+* '''LW''': rt = destination (메모리에서 가져온 값을 받음)
+* '''SW''': rt = source (메모리로 보낼 값)
+* '''BEQ/BNE''': rt = 비교 대상
+* '''ADDI''': rt = destination
+
+== J-type 세부 ==
+
+J-type은 oldest이자 가장 단순한 형식이다. op 6 + imm26 = 32비트.
+
+* j: 0x02
+* jal: 0x03
+
+[[jr]]은 J-type이 아니라 '''R-type'''이다 (funct=0x08, rs=점프할 주소가 든 register).
+
+== 같이 보기 ==
+* [[MIPS]]
+* [[Branch 주소 계산]]
+* [[Jump 주소 계산]]
+`
+},
+
+// ----------------------------------------------------------------
+"함수 호출 규약": {
+  title: "함수 호출 규약 (Calling Convention)",
+  category: ["ISA", "MIPS"],
+  body: `
+'''함수 호출 규약'''(Calling Convention)은 함수 호출 시 어느 레지스터에 무엇을 담고, 누가 저장 책임을 지는지 약속한 규칙이다. [[MIPS]]는 이 규약이 명확해 학습에 좋다.
+
+== 레지스터 사용 표 ==
+
+{| class="table"
+! 번호 || 이름 || 용도 || Saved by
+|-
+| $0 || $zero || 항상 0 (read-only) || —
+|-
+| $2~$3 || $v0, $v1 || return value || —
+|-
+| $4~$7 || $a0~$a3 || argument (4개) || caller
+|-
+| $8~$15, $24~$25 || $t0~$t9 || temporary || '''caller'''
+|-
+| $16~$23 || $s0~$s7 || saved register || '''callee'''
+|-
+| $29 || $sp || stack pointer || callee
+|-
+| $30 || $fp || frame pointer || callee
+|-
+| $31 || $ra || return address || caller (필요시 callee)
+|}
+
+{tip}외우는 트릭:<br>
+· '''t = temporary''' → caller가 알아서 (callee는 마음대로 써도 됨)<br>
+· '''s = saved''' → callee가 책임 (사용 전 save, return 전 restore){/tip}
+
+== Caller-saved vs Callee-saved ==
+
+* '''Caller-saved''': 함수를 부르는 쪽이 백업 책임. 호출 후 값이 보존된다는 보장이 없다.
+* '''Callee-saved''': 함수를 받는 쪽이 백업 책임. 호출 후에도 원래 값 그대로.
+
+왜 두 종류가 있는가? 모든 레지스터를 callee-saved로 하면 작은 함수도 항상 백업/복원 오버헤드가 생기고, 모두 caller-saved로 하면 caller 쪽이 항상 백업을 해야 한다. 두 종류를 섞으면 컴파일러가 효율적으로 골라 쓸 수 있다.
+
+== Leaf vs Non-leaf 함수 ==
+
+* '''Leaf function''': 다른 함수를 호출하지 않음 → $ra save 불필요
+* '''Non-leaf function''': [[jal]] 한 번이라도 있으면 $ra가 덮어써짐 → '''반드시 save'''
+
+재귀함수는 자기 자신을 jal로 호출하므로 non-leaf.
+
+== Stack Frame ==
+
+MIPS 스택은 '''메모리 주소 감소 방향'''으로 자란다.
+
+<pre class="ascii">
+ high addr  ┌──────────────┐
+            │  argument 5+ │ ← 5번째 이상 argument
+            │  saved $ra   │
+            │  saved $s0-7 │
+            │  local vars  │
+ $sp →      └──────────────┘
+ low addr
+</pre>
+
+전형적인 prologue:
+<pre>
+addi $sp, $sp, -K       # K bytes 할당
+sw   $ra, K-4($sp)      # ra 저장
+sw   $s0, K-8($sp)      # s0 저장
+... 함수 본문 ...
+lw   $s0, K-8($sp)      # 복원
+lw   $ra, K-4($sp)
+addi $sp, $sp, K        # 해제
+jr   $ra                # return
+</pre>
+
+== Argument Passing ==
+
+* 처음 4개: $a0~$a3
+* 5번째 이상: '''스택을 통해 전달'''
+
+MIPS는 $a4~$a7이 없다. (다른 RISC, 예 [[RISC-V]]는 $a4~$a7도 있다.)
+
+== 같이 보기 ==
+* [[MIPS]]
+* [[Stack Frame]]
+* [[Leaf 함수]]
+`
+},
+
+// ----------------------------------------------------------------
+"파이프라인 예외": {
+  title: "파이프라인 예외 (Pipeline Exception)",
+  category: ["파이프라인"],
+  body: `
+'''파이프라인 예외'''(Pipeline Exception)는 명령어 실행 도중 정상 흐름을 벗어나는 사건을 다루는 메커니즘이다. CPU 입장에서는 의도치 않은 점프지만, 운영체제 입장에서는 통제권을 가져오는 가장 중요한 수단이다.
+
+== 용어 ==
+
+{| class="table"
+! 용어 || 정의
+|-
+| '''Exception''' || CPU '''내부''' 원인 (overflow, illegal opcode) — synchronous
+|-
+| '''Interrupt''' || CPU '''외부''' 원인 (I/O, timer) — asynchronous
+|-
+| '''Trap''' || 의도된 예외 (시스템 콜 등)
+|-
+| '''Fault''' || 복구 가능한 예외 (page fault 등)
+|-
+| '''Abort''' || 복구 불가능 (hardware failure)
+|}
+
+== Precise Exception ==
+
+[[img:exc_precise-21.png|Precise exception 슬라이드 — older 완료 / faulting 정지 / younger flush|medium]]
+
+'''Precise exception''' = 예외 발생 시점에서 프로그램 상태가 '깔끔하게' 정의되어야 한다는 원칙.
+
+규칙:
+* 예외 발생 명령어보다 '''앞선(older) 명령어들은 모두 완료'''
+* 예외 발생 명령어는 '''직전 상태로 정지'''
+* 예외 발생 명령어보다 '''뒤(younger) 명령어들은 모두 flush'''
+
+[[비순차 실행|OoO]] 같은 복잡한 마이크로아키텍처에서는 [[ROB]]가 이 보장을 제공한다.
+
+{joke}Precise exception이 없으면 디버깅이 지옥이 된다. "이 줄에서 에러가 났는데, 위에 어디까지 실행됐는지 모르겠어"라는 상태에서 매번 시작해야 함. ARM/x86/MIPS 모두 precise exception을 ISA 차원에서 약속한다.{/joke}
+
+== Transparent ==
+
+'''Transparent''' = 사용자(user 모드 프로그램)는 인터럽트 발생 사실을 모르게 처리. 핸들러가 끝나면 마치 아무 일도 없었던 것처럼 다음 명령어로 복귀한다.
+
+== Control Transfer ==
+
+핸들러 진입/복귀의 점프 동작 자체를 가리키는 용어. 시험에서 자주 등장하는 용어이지만 의미는 단순하다.
+
+== Stage별 예외 종류 ==
+
+[[img:exc_stage-16.png|Stage별 예외 종류 슬라이드 — IF/ID/EX/MEM 각각|medium]]
+
+각 파이프라인 stage마다 발생할 수 있는 예외가 다르다.
+
+<pre class="ascii">
+ IF  ─→ instruction memory 접근 오류
+ ID  ─→ illegal opcode
+ EX  ─→ overflow / divide-by-zero
+ MEM ─→ data memory 접근 오류
+ WB  ─→ (보통 예외 없음)
+</pre>
+
+[[img:exc_stage-17.png|Stage별 예외 추가 슬라이드|medium]]
+
+{warn}함정 단골: "improper access to memory"라는 표현이 IF와 MEM 두 stage에 모두 등장한다. '''대상 메모리'''(instruction vs data)로 stage를 구분해야 한다.{/warn}
+
+== MIPS Coprocessor ==
+
+[[MIPS]]는 예외/인터럽트를 별도의 [[코프로세서]] 0번에서 처리한다.
+
+* '''CP0''' (Coprocessor 0): System control — EPC, Cause, Status register 보유
+* '''CP1''' (Coprocessor 1): FPU (부동소수점)
+
+* '''EPC''' (Exception PC): 복귀할 주소 저장
+* '''Cause register''': 예외 원인 코드 저장
+* '''Status register''': 인터럽트 마스크, 모드 등
+
+{warn}인터럽트 처리 = '''CP0''' (CP1 아님). 부동소수점은 CP1.{/warn}
+
+== Vectored vs Polled Interrupt ==
+
+핸들러를 어떻게 찾는가에 따라 두 가지 방식이 있다.
+
+=== Vectored Interrupt ===
+
+하드웨어가 예외 cause를 보고 '''PC mux에 핸들러 주소를 직접 매핑'''한다. 매우 빠르다.
+
+* MIPS: 0x8000_0180 고정 주소로 점프
+* x86: IDT (Interrupt Descriptor Table) 인덱스 사용
+
+=== Polled Interrupt ===
+
+공통 핸들러 진입 후 SW가 cause register를 읽고 분기. 단순하지만 느리다.
+
+{warn}자주 틀리는 함정: "메인 메모리에서 label 검색해서 핸들러를 찾는다" → '''거짓'''. label은 어셈블러/링커 단계에서 모두 숫자 주소로 치환되어 사라진다. 하드웨어는 label이라는 개념을 모른다.{/warn}
+
+== 같이 보기 ==
+* [[Load-Use 해저드]]
+* [[비순차 실행]]
+* [[가상 메모리]] — page fault도 이 메커니즘으로 처리된다
+`
+},
+
+// ----------------------------------------------------------------
+"Load-Use 해저드": {
+  title: "Load-Use 해저드",
+  category: ["파이프라인"],
+  body: `
+'''Load-Use 해저드'''는 [[LW]] 명령어 바로 뒤에 그 결과를 사용하는 명령어가 오는 경우 발생하는 특수한 [[데이터 해저드]]이다. 일반 [[Forwarding]]으로는 해결되지 않아 반드시 '''1 cycle stall'''이 필요하다.
+
+== 왜 발생하는가 ==
+
+<pre class="ascii">
+ cycle:    1   2   3   4   5
+ LW $t0:  IF  ID  EX  MEM WB
+ ADD $t0:     IF  ID  EX  MEM WB
+                      ↑
+                      ADD가 EX 시작할 때
+                      LW의 데이터는 MEM 끝에서 나옴
+                      → 같은 cycle 내 forwarding 불가
+</pre>
+
+* LW의 결과 데이터는 '''MEM stage 끝'''에서야 확보됨
+* 바로 다음 ADD의 EX는 같은 cycle에 시작 → 시간상 LW data가 아직 없음
+* 일반 [[Forwarding]] (EX/MEM → EX)으로 해결 불가
+
+== 해결: 1 Cycle Stall + Forwarding ==
+
+<pre class="ascii">
+ cycle:    1   2   3   4   5   6
+ LW $t0:  IF  ID  EX  MEM WB
+ ADD $t0:     IF  ID  **  EX  MEM WB
+                      ↑
+                   bubble 1개 삽입
+                   그 후 MEM→EX forwarding 가능
+</pre>
+
+요지: '''반드시 1 stall''' + 그 다음에 MEM/WB → EX forwarding으로 처리.
+
+== 컴파일러 최적화 ==
+
+좋은 컴파일러는 LW와 그 결과를 쓰는 명령어 사이에 다른 독립 명령어를 끼워 넣어 stall을 회피한다 ([[명령어 스케줄링]]).
+
+== 같이 보기 ==
+* [[데이터 해저드]]
+* [[Forwarding]]
+* [[파이프라인 예외]]
+`
+},
+
+// ----------------------------------------------------------------
+"비순차 실행": {
+  title: "비순차 실행 (Out-of-Order Execution)",
+  category: ["고급 마이크로아키텍처"],
+  body: `
+'''비순차 실행'''(Out-of-Order Execution, OoO)은 프로그램에 적힌 순서를 따르지 않고, 명령어들의 의존성과 자원 가용성에 따라 '''준비된 순서대로''' 실행하는 마이크로아키텍처 기법이다. [[슈퍼스칼라]]와 결합해 [[ILP]]를 극한까지 끌어낸다.
+
+{joke}OoO 프로세서는 "이것 좀 시켜줘"라고 했을 때, 사장님이 "그래 그래" 하고는 자기 마음대로 순서 바꿔 하는데, 결과를 보고할 때만은 시킨 순서대로 정리해서 보고하는 능구렁이 같은 친구다.{/joke}
+
+== 왜 필요한가 ==
+
+[[파이프라인]]만으로는 의존성 때문에 stall이 자주 일어난다. 예:
+
+<pre>
+1. LW   $t0, 0($s0)    ; cache miss → 100 cycle stall
+2. ADD  $t1, $t0, $t2  ; #1에 의존, 같이 멈춤
+3. SUB  $t3, $t4, $t5  ; 독립적 — 그런데 in-order면 같이 멈춤
+</pre>
+
+In-order 실행이면 #3도 #1 끝날 때까지 대기해야 한다. OoO는 #3을 먼저 끝내고, #1과 #2는 따로 처리한다.
+
+== 핵심 구조 ==
+
+[[img:ooo_rob-19.png|OoO 파이프라인 구조 슬라이드 — IF/ID/Rename → ISQ → Execute → ROB|medium]]
+
+[[img:ooo_rob-20.png|ROB가 commit을 in-order로 관리, ISQ가 ready 명령어를 OoO 발행|medium]]
+
+<pre class="ascii">
+ IF → ID(Rename) → ISQ ─→ Execute(ALU/FP/LSQ) → WB ─→ ROB ─→ Retire
+                    │                                      │
+                  ready instr 발행                       in-order
+                  (OoO 가능)                              commit
+</pre>
+
+=== ROB (Reorder Buffer) ===
+
+비순차로 실행되어 끝난 결과들을 '''원래 프로그램 순서대로 commit/retire'''하는 구조. = instruction window.
+
+* 모든 명령어는 fetch 후 ROB에 entry를 받음
+* 실행은 순서 무관하게 끝나도, retire는 ROB의 head부터 in-order로
+* [[Speculation]] 실패 시 rollback에도 사용
+
+=== ISQ (Issue Queue) ===
+
+[[레지스터 리네이밍|Rename]]된 명령어를 source operand가 준비될 때까지 보관. 자원 + operand 모두 ready인 순간 실행 유닛으로 발행(issue).
+
+=== LSQ (Load/Store Queue) ===
+
+Store 값을 ROB retire 전까지 보관. 메모리 [[일관성]] 보장.
+
+== 의존성 4종 ==
+
+{| class="table"
+! 종류 || 약자 || 진짜? || 해결
+|-
+| Read After Write || '''RAW''' || ✅ 진짜 (data dependency) || Forwarding, Stall
+|-
+| Write After Read || '''WAR''' || ❌ 가짜 (anti) || '''Register Renaming'''
+|-
+| Write After Write || '''WAW''' || ❌ 가짜 (output) || '''Register Renaming'''
+|-
+| Read After Read || RAR || ❌ 의존성 아님 || 신경 X
+|}
+
+가짜 의존성은 '''이름 충돌''' 때문에 생긴다. 다른 이름으로 바꾸면 자동 소멸.
+
+== 레지스터 리네이밍 ==
+
+WAR/WAW를 제거하는 핵심 기법. 컴파일러가 본 [[아키텍처 레지스터]] 이름(예: $t0)을 하드웨어 내부에서 매번 새 이름으로 매핑한다.
+
+{info}'''PRF (Physical Register File)''' 디테일은 [[DGIST]] 학부 강의에서는 graduate class 토픽으로 분류되어 시험 범위 밖이다. 단, "renaming이 가짜 의존성을 제거한다"는 개념은 시험 대상.{/info}
+
+== Speculation ==
+
+분기 예측해서 미리 실행하는 기법. 핵심 원칙:
+
+{warn}'''Speculation 결과는 즉시 commit하지 않는다.''' ROB에 보관한 채 분기 결과 검증 후 commit. 예측 실패 시 ROB에서 flush.{/warn}
+
+자주 출제되는 "FALSE 보기" 함정:
+* ✗ "투기적 명령어가 실행 즉시 architectural state에 commit된다" → 거짓
+* ✓ "분기 예측 정확도(90%+)에 크게 의존" → 참
+* ✓ "예측 실패 시 큰 페널티" → 참
+
+== Scoreboarding ==
+
+동적 스케줄링 기법. 각 명령어의 의존성/자원 상태를 "현황판"으로 추적하며 OoO 실행을 관리한다.
+
+{warn}함정: scoreboarding을 [[TLB]]나 [[페이지 테이블]]과 연결하면 거짓. Scoreboarding은 순전히 '''데이터 해저드 관리'''용이다.{/warn}
+
+== ILP의 한계 ==
+
+Issue width를 4 → 6 → 8로 늘려도 평균 [[IPC]]는 ~2 근처에서 정체된다. 이유:
+
+# True data dependency (RAW)는 어쩔 수 없음
+# 분기 예측이 90%여도 5번 연속이면 0.95^5 ≈ 77%
+# Memory latency
+
+→ 그래서 [[멀티스레딩]]과 [[CMP]]로 진화.
+
+== 같이 보기 ==
+* [[슈퍼스칼라]]
+* [[레지스터 리네이밍]]
+* [[멀티스레딩]]
+* [[CMP]]
+`
+},
+
+// ----------------------------------------------------------------
+"슈퍼스칼라": {
+  title: "슈퍼스칼라 (Superscalar)",
+  category: ["고급 마이크로아키텍처"],
+  body: `
+'''슈퍼스칼라'''(Superscalar)는 한 사이클에 '''여러 명령어를 동시에 issue/execute'''하는 마이크로아키텍처 기법이다. 단일 파이프라인이 issue width를 1보다 크게 가지는 것을 가리킨다.
+
+== 단일 vs 슈퍼스칼라 ==
+
+* 단일 발행 (single-issue, scalar): 한 cycle에 명령어 1개
+* 슈퍼스칼라: 한 cycle에 명령어 2~6개 (보통 4-wide)
+
+이론적 최대 [[IPC]]가 1 → N으로 늘어난다. 실제로는 의존성/분기예측 때문에 평균 IPC ~2가 한계.
+
+== OoO와의 결합 ==
+
+대부분의 현대 슈퍼스칼라는 [[비순차 실행|OoO]]와 결합된다. 단순 in-order 슈퍼스칼라는 의존성으로 모든 발행 슬롯이 자주 비기 때문이다.
+
+== 같이 보기 ==
+* [[비순차 실행]]
+* [[VLIW]] — 정적 슈퍼스칼라의 사촌
+* [[CMP]]
+`
+},
+
+// ----------------------------------------------------------------
+"멀티스레딩": {
+  title: "멀티스레딩 (Multithreading)",
+  category: ["병렬성"],
+  body: `
+'''멀티스레딩'''(Multithreading)은 한 코어에서 여러 [[스레드]]를 번갈아 또는 동시에 실행하는 기법이다. 단일 스레드의 [[ILP]] 한계를 [[TLP]] (Thread-Level Parallelism)로 보완한다.
+
+== 도입 동기 ==
+
+[[비순차 실행|OoO]] 슈퍼스칼라가 4-wide여도 평균 IPC ~2 → 자원 절반이 놀고 있음. 다른 스레드의 명령어로 그 빈자리를 채우자는 발상.
+
+* 단일 스레드: ILP만 사용
+* 멀티스레딩: 자원 활용도(utilization) 극대화 → 전체 [[처리량]] 향상
+
+{warn}함정: "멀티스레딩이 레지스터 파일 면적을 줄여준다" → 거짓. 오히려 '''각 스레드의 architectural state'''(register file 등)를 따로 보관해야 해서 면적이 늘어난다.{/warn}
+
+== 분류 ==
+
+<pre class="ascii">
+       Multithreading
+       ┌──────────────┐
+       │              │
+   Time Sharing    Space Sharing
+   (한 cycle =      (한 cycle =
+    한 스레드만)     여러 스레드)
+       │              │
+   ┌───┴───┐         SMT
+   │       │      (Intel HT)
+  FGMT    CGMT
+ 매 사이클  long-latency
+ 교체      이벤트 시 교체
+</pre>
+
+=== FGMT (Fine-Grained Multithreading) ===
+
+매 사이클마다 스레드를 round-robin으로 교체.
+
+* 장점: long-latency stall이 한 스레드만 영향
+* 단점: 단일 스레드 IPC는 1/N로 감소
+
+=== CGMT (Coarse-Grained Multithreading) ===
+
+평상시엔 한 스레드를 계속 실행하다가, cache miss 같은 long-latency 이벤트 발생 시에만 다른 스레드로 교체.
+
+* 장점: 단일 스레드 IPC는 그대로
+* 단점: short stall은 못 가림
+
+=== SMT (Simultaneous Multithreading) ===
+
+'''같은 사이클'''에 여러 스레드의 명령어를 동시에 발행. Intel [[하이퍼스레딩]]의 기반.
+
+* 단일 슈퍼스칼라 코어의 '''horizontal + vertical waste를 모두 활용'''
+* '''Space Sharing''' 방식
+
+== Horizontal vs Vertical Waste ==
+
+[[img:mt_waste-09.png|Horizontal waste vs Vertical waste — superscalar의 두 종류 자원 낭비|medium]]
+
+<pre class="ascii">
+       Issue slot (가로 = width)
+       ┌──┬──┬──┬──┐
+ cycle │■ │■ │  │  │ ← Horizontal waste (사이클 내 ILP 부족)
+       ├──┼──┼──┼──┤
+       │  │  │  │  │ ← Vertical waste (사이클 통째로 빔)
+       └──┴──┴──┴──┘
+       시간 ↓
+</pre>
+
+* '''Horizontal Waste''': 같은 사이클 내 빈 슬롯 (ILP 부족)
+* '''Vertical Waste''': 사이클 통째 비어있음 (long-latency stall)
+* SMT는 둘 다 다른 스레드 명령어로 채워서 해결
+
+[[img:mt_fgmt-12.png|FGMT — 매 사이클 스레드 교체. 단일 스레드 IPC ↓, 자원 활용 ↑.|medium]]
+
+[[img:mt_cgmt-14.png|CGMT — long-latency 이벤트 시에만 스레드 교체.|medium]]
+
+[[img:mt_smt-16.png|SMT — 같은 사이클에 여러 스레드 동시 발행 (Space Sharing).|medium]]
+
+== 자원 공유 vs 개별 소유 ==
+
+같은 프로그램의 스레드들 사이에서:
+
+{| class="table"
+! 공유 (모든 스레드 공통) || 개별 소유 (스레드마다 따로)
+|-
+| Code (명령어 본체) || Architectural Register File
+|-
+| Global Data || Stack
+|-
+| Heap || PC
+|}
+
+이유: 같은 프로그램 코드를 보지만, 실행 상태(register, stack, PC)는 독립이어야 안 꼬임.
+
+== Niagara ==
+
+Sun [[UltraSPARC T1]] (코드네임 Niagara)은 단순 코어 다수 + 강한 멀티스레딩(CGMT) 결합으로 '''서버 워크로드'''(대규모 동시 simple 스레드)에 특화된 프로세서다. 메모리 latency hiding으로 throughput 극대화.
+
+{warn}함정: "실시간 임베디드 결정론적 타이밍" → 이건 [[VLIW]] 영역. Niagara와 무관.{/warn}
+
+== Overhead ==
+
+* '''Switching overhead''': context switch 시 state save/restore
+* '''Interference overhead''': 공유 자원(cache/ALU) 경쟁
+
+== 같이 보기 ==
+* [[VLIW]]
+* [[ILP와 TLP]]
+* [[CMP]]
+* [[Scratchpad와 Cache]]
+`
+},
+
+// ----------------------------------------------------------------
+"VLIW": {
+  title: "VLIW (Very Long Instruction Word)",
+  category: ["병렬성"],
+  body: `
+'''VLIW'''(Very Long Instruction Word)는 컴파일러가 정적으로 독립적인 명령어들을 묶음(bundle)으로 packing해서 한 사이클에 모두 발행하는 ISA 설계 철학이다.
+
+== [[슈퍼스칼라]]와의 차이 ==
+
+{| class="table"
+! || 슈퍼스칼라 (OoO) || VLIW
+|-
+| 의존성 검사 || '''하드웨어''' (runtime) || '''컴파일러''' (compile-time)
+|-
+| HW 복잡도 || 매우 높음 (ROB/ISQ/Rename) || 단순
+|-
+| 컴파일러 부담 || 낮음 || 매우 높음
+|-
+| 코드 호환성 || 좋음 || 나쁨 (HW 변경 시 재컴파일)
+|}
+
+== Lock-step 실행 ==
+
+VLIW 묶음 내의 모든 연산은 같이 stage를 이동한다. '''묶음 내 한 연산이라도 stall'''되면 전체 묶음이 stall된다.
+
+{warn}함정: "런타임에 컴파일러가 NOP을 삽입한다" → 거짓. NOP은 '''컴파일 타임에 정적으로만''' 삽입 가능.{/warn}
+
+== 사용처 ==
+
+* [[Itanium]] (Intel + HP) — 일반 시장 실패
+* [[DSP]] (Digital Signal Processor) — 성공
+* [[GPU]] 일부
+
+일반 컴퓨팅에서는 컴파일러가 따라가지 못해 망했지만, '''규칙적인 워크로드'''(DSP, embedded)에서는 여전히 쓰인다.
+
+== 같이 보기 ==
+* [[멀티스레딩]]
+* [[ILP와 TLP]]
+`
+},
+
+// ----------------------------------------------------------------
+"캐시": {
+  title: "캐시 (Cache)",
+  category: ["메모리 시스템"],
+  body: `
+'''캐시'''(Cache)는 [[CPU]]와 메인 메모리 사이의 작고 빠른 메모리이다. [[지역성]](locality) 원리에 기반해 자주 쓰이는 데이터를 가까이 둠으로써 평균 메모리 접근 시간을 크게 줄인다.
+
+== 지역성 (Locality) ==
+
+* '''Temporal locality''': 최근에 쓴 데이터는 곧 또 쓸 가능성 높음
+* '''Spatial locality''': 어떤 주소를 쓰면 그 근처 주소도 곧 쓸 가능성 높음
+
+캐시는 두 지역성을 모두 활용한다. block 단위로 가져오는 건 spatial을, 자주 쓰는 block을 유지하는 건 temporal을 노리는 것.
+
+== AMAT 공식 ==
+
+[[img:cache_amat-07.png|AMAT (Average Memory Access Time) 슬라이드. Hit Time + Miss Rate × Miss Penalty.|medium]]
+
+가장 중요한 단일 공식:
+
+<pre>
+AMAT = Hit Time + Miss Rate × Miss Penalty
+</pre>
+
+다중 레벨:
+<pre>
+AMAT_L1 = HitTime_L1 + MR_L1 × (HitTime_L2 + MR_L2 × MissPenalty_L2)
+</pre>
+
+[[img:cache_amat-08.png|AMAT 계산 예제 슬라이드|medium]]
+
+== 캐시 주소 분해 ==
+
+<pre class="ascii">
+ ┌────────────┬──────────┬──────────────┐
+ │    Tag     │  Index   │ Block offset │
+ └────────────┴──────────┴──────────────┘
+   상위비트     중간       하위
+   (검증용)    (몇번칸)    (블록 내 byte)
+</pre>
+
+{| class="table"
+! 필드 || 역할
+|-
+| '''Index''' || 캐시 내 어느 set/block을 찾을지 — "몇 번째 칸을 열까"
+|-
+| '''Tag''' || 그 칸의 데이터가 요청한 주소와 일치하는지 검증 — "신분증"
+|-
+| '''Block offset''' || 찾아낸 블록 '''내부에서''' 원하는 byte/word 선택
+|}
+
+* Block offset 비트 = log2(블록 크기 in bytes)
+* Index 비트 = log2(set 수)
+* Tag 비트 = 나머지
+
+{warn}함정: "byte 선택은 Index" → '''거짓'''. Index는 블록 찾기, byte는 offset.{/warn}
+
+== 매핑 방식 ==
+
+[[img:cache_assoc-23.png|Direct-mapped 캐시 — 각 블록이 정해진 한 자리에만 들어감|medium]]
+
+=== Direct-Mapped ===
+
+각 메모리 블록이 들어갈 캐시 위치가 '''딱 한 곳으로 고정''':
+
+<pre>
+cache index = (Block number) mod (캐시 블록 수)
+</pre>
+
+{warn}함정: "(Block number) × (Number of sets)" → '''거짓'''. 곱셈은 주소를 폭발적으로 키워 캐시 범위 이탈.{/warn}
+
+* 장점: 단순, 빠름
+* 단점: [[Conflict miss]] 발생 (서로 다른 블록이 같은 칸 두고 싸움)
+
+=== Set-Associative ===
+
+[[img:cache_assoc-24.png|Set-Associative — 각 블록이 N개 way 중 하나에 들어감|medium]]
+
+각 메모리 블록이 들어갈 곳이 '''N개 way 중 아무 곳''':
+
+* 2-way / 4-way / 8-way 등
+* set 내 모든 way의 [[Tag]]를 '''병렬 비교'''
+* Direct-mapped와 Fully-associative의 절충
+
+=== Fully-Associative ===
+
+[[img:cache_assoc-25.png|Fully-Associative — 어느 자리든 들어감|medium]]
+
+어디든 들어갈 수 있음. set이 1개 = N-way (N = 전체 블록 수).
+
+* 장점: Conflict miss 완전 제거
+* 단점: 모든 Tag를 다 비교해야 함 → 비싸고 느림 → 작은 캐시([[TLB]] 등)에만 사용
+
+{joke}3가지 매핑은 사실 같은 스펙트럼의 양 끝점이다. Direct = 1-way set-assoc, Fully = N-way set-assoc (N=전체블록수). Set-assoc은 그 사이 어딘가. 그래서 set-associativity 이론 하나로 셋 다 다룬다.{/joke}
+
+== 3C Miss 모델 ==
+
+{| class="table"
+! 종류 || 원인 || Fully-assoc로 제거?
+|-
+| '''Compulsory (Cold)''' || 첫 접근 || 불가 ([[prefetch]]로만 완화)
+|-
+| '''Capacity''' || working set > 캐시 전체 용량 || '''불가''' (크기 동일)
+|-
+| '''Conflict''' || 같은 Index 자리싸움 || '''제거됨'''
+|}
+
+{warn}자주 틀리는 함정: "Fully-assoc이 capacity miss 제거" → '''거짓'''. capacity는 크기 문제, 매핑 방식과 무관.{/warn}
+
+== Write Policy ==
+
+=== Write-Through vs Write-Back ===
+
+* '''Write-Through''': 쓰기 시 cache + 메모리 동시 업데이트
+* '''Write-Back''': 쓰기 시 cache만 → eviction 시 메모리에 write-back ("lazy write")
+
+=== Write-Allocate vs No-Write-Allocate ===
+
+write miss 시:
+* '''Write-Allocate''': 메모리에서 가져와서 캐시에 적재 후 쓰기
+* '''No-Write-Allocate''': 캐시 거치지 않고 메모리에 바로 씀
+
+흔한 조합: '''WB + WA''' / '''WT + NWA'''
+
+=== Dirty bit ===
+
+Write-Back 캐시 전용. "이 블록이 캐시 로드 후 수정된 적 있는가?" 표시.
+
+* Dirty=1 → eviction 시 '''메모리에 write-back''' (변경분 보존)
+* Dirty=0 → 그냥 discard
+
+{warn}함정 1: "Dirty bit = invalid 표시" → '''거짓'''. invalid는 [[Valid bit]] 역할.<br>함정 2: "매 쓰기마다 메모리에 기록" → 그건 Write-Through.{/warn}
+
+== MSHR (Miss Status Holding Register) ==
+
+진행 중인 cache miss의 정보를 보관하는 레지스터.
+
+* '''Non-blocking cache''' 구현 핵심
+* MSHR 있음 → miss 대기 중에도 후속 hit/miss 요청 처리 가능
+* MSHR 없음 → '''blocking cache''' → miss 1개 해결까지 모든 요청 차단
+
+키워드:
+* '''Hit Under Miss''': miss 대기 중 다른 hit 처리
+* '''Miss Under Miss''': 동시에 여러 miss 추적
+
+{warn}함정: "MSHR이 read/write hit 구분" → '''거짓'''. MSHR은 이름 그대로 '''miss 전용''', hit과 무관.{/warn}
+
+== Prefetch ==
+
+미리 데이터를 가져오는 기법.
+
+* '''Sequential''': A → A+1, A+2... 연속 블록
+* '''Stride''': 연속 미스의 delta 학습 → 비연속이지만 규칙적인 간격 패턴 예측
+
+{warn}함정: "Stride가 하드웨어 면적 더 작음" → '''거짓'''. 반대로 PC별 history buffer 필요해서 더 큼.{/warn}
+
+== Replacement Policy ==
+
+{| class="table"
+! Policy || 정확도 || HW 복잡도
+|-
+| FIFO || 낮음 || 단순
+|-
+| Random || 낮음 || 가장 단순
+|-
+| LFU || 중간 || 카운터 필요
+|-
+| '''LRU (true)''' || 높음 || way 수 ↑ → '''폭증'''
+|-
+| '''Pseudo-LRU''' || 중간~높음 || 트리비트 (way당 log2개)
+|}
+
+way 수 많은 캐시는 true LRU 불가능 → Pseudo-LRU 사용. [[LFU]]는 한 번 인기 있던 블록이 영구히 살아남는 문제가 있다.
+
+== 캐시 일관성 ==
+
+[[MSI 프로토콜]] 문서 참고.
+
+== 같이 보기 ==
+* [[MSI 프로토콜]]
+* [[가상 메모리]]
+* [[TLB]]
+* [[AMAT]]
+* [[지역성]]
+`
+},
+
+// ----------------------------------------------------------------
+"MSI 프로토콜": {
+  title: "MSI 프로토콜",
+  category: ["메모리 시스템", "병렬성"],
+  body: `
+'''MSI 프로토콜'''은 멀티코어 시스템에서 '''캐시 일관성'''(Cache Coherence)을 유지하는 가장 기본적인 [[snooping]] 프로토콜이다. M, S, I 세 상태로 캐시 블록의 권한을 관리한다.
+
+[[img:cache_msi-54.png|MSI 프로토콜 개요 슬라이드|medium]]
+
+== 3가지 상태 ==
+
+{| class="table"
+! 상태 || 의미 || 메모리와의 관계
+|-
+| '''M (Modified)''' || 이 코어만 가짐, 독점, 수정됨 || 메모리 ≠ 캐시 (dirty)
+|-
+| '''S (Shared)''' || 여러 코어가 같은 값 보유 || 메모리 = 캐시 (clean)
+|-
+| '''I (Invalid)''' || 무효 (없는 것과 같음) || —
+|}
+
+== 트랜잭션 ==
+
+=== Processor request ===
+* '''PrRd''': 프로세서가 읽기 요청
+* '''PrWr''': 프로세서가 쓰기 요청
+
+=== Bus transaction ===
+* '''BusRd''': 다른 코어에 "이 블록 읽으려 한다" 알림 (공유 의도)
+* '''BusRdX''': 다른 코어에 "이 블록 쓸 거다" 알림 → 모두 invalidate
+* '''BusWB''': 메모리에 write-back
+
+== 상태 전이 ==
+
+<pre class="ascii">
+            BusRdX (다른 코어가 쓰려함)
+       ┌────────────────────────┐
+       │        Invalidate      │
+       ▼                        │
+   ┌───────┐  PrWr/BusRdX  ┌──────┐
+   │   I   │ ────────────→ │  M   │
+   │       │               │      │
+   │       │               │ 독점 │
+   │ (없음) │              │ dirty│
+   └───┬───┘              └──┬───┘
+       │ PrRd/BusRd          │ 다른 코어가
+       ▼                     │ BusRd 시
+   ┌───────┐                 ▼ (BusWB 후 S로)
+   │   S   │ ←─────────────────
+   │ Shared│
+   │ clean │
+   └───────┘
+</pre>
+
+== 주요 전이 ==
+
+[[img:cache_msi-55.png|MSI 상태 전이 다이어그램 슬라이드 원본|medium]]
+
+* '''I → S''': PrRd 발생 → BusRd로 메모리에서 가져옴
+* '''I → M''': PrWr 발생 → BusRdX (다른 코어들 invalidate) → M
+* '''S → M''': PrWr 발생 → BusRdX → M (다른 코어들 invalidate)
+* '''M → S''': 다른 코어가 BusRd 발생 시키면 → 응답으로 데이터 제공 + BusWB + S로
+* '''M → I''': 다른 코어가 BusRdX → 자기 데이터 메모리에 write-back 후 I
+
+[[img:cache_msi-56.png|MSI 전이의 구체적 예시|medium]]
+
+== MSI의 한계 ==
+
+* '''S → M 전이'''마다 BusRdX 발생 → 단일 코어만 읽고 있어도 매번 bus traffic
+* 해결: [[MESI]] 프로토콜 (Exclusive 상태 추가)
+
+== 같이 보기 ==
+* [[캐시]]
+* [[Snooping]]
+* [[MESI]]
+`
+},
+
+// ----------------------------------------------------------------
+"가상 메모리": {
+  title: "가상 메모리 (Virtual Memory)",
+  category: ["메모리 시스템"],
+  body: `
+'''가상 메모리'''(Virtual Memory)는 각 프로세스에게 '독립된 큰 주소 공간'이라는 환상을 제공하는 메모리 관리 기법이다. 실제 [[DRAM]]보다 큰 주소 공간을 쓸 수 있고, 프로세스 간 보호와 공유가 모두 가능하다.
+
+{joke}OS 수업과 컴퓨터 구조 수업이 만나는 지점. 두 수업 사이에서 길을 잃은 학생은 페이지 테이블 사이에서 무한 루프를 돌게 된다.{/joke}
+
+== 핵심 용어 ==
+
+{| class="table"
+! 용어 || 정의
+|-
+| '''VA''' (Virtual Address) || 프로세스가 보는 주소
+|-
+| '''PA''' (Physical Address) || 실제 DRAM 주소
+|-
+| '''VPN''' (Virtual Page Number) || VA의 상위 비트
+|-
+| '''PFN''' (Physical Frame Number) || PA의 상위 비트
+|-
+| '''Page''' || 보통 4KB (offset 12 bits)
+|-
+| '''[[MMU]]''' (Memory Management Unit) || VA→PA 변환 담당 HW
+|-
+| '''PTW''' (Page Table Walker) || MMU 내부, page table 순회 회로
+|-
+| '''[[TLB]]''' || 최근 PTE 캐시 (translation 캐시)
+|}
+
+== Segmentation vs Paging ==
+
+[[img:vm_paging-26.png|Paging 개요 슬라이드|medium]]
+
+{| class="table"
+! || Segmentation || Paging
+|-
+| 크기 || 가변 || '''고정 (4KB)'''
+|-
+| 매핑 || Base + Bound 쌍 || VPN → PFN
+|-
+| 단편화 || '''External''' (외부) || '''Internal''' (내부)
+|-
+| 사용 || Legacy (x86 호환용) || 현대 표준
+|}
+
+[[img:vm_paging-27.png|Page table 구조 슬라이드|medium]]
+
+* '''External fragmentation''': 자유 공간이 흩어져 있어 큰 segment 할당 불가
+* '''Internal fragmentation''': 페이지 크기보다 작은 데이터로 페이지 일부가 낭비
+
+== Demand Paging ==
+
+페이지를 처음부터 다 메모리에 올리지 않고, 접근 시점에 필요한 페이지만 swap space(disk)에서 가져오는 방식. OS가 관리한다.
+
+== Page Fault 분류 ==
+
+{| class="table"
+! 종류 || 상황 || 비용
+|-
+| Hit || TLB hit, page in memory || ns
+|-
+| '''Major fault''' || page가 swap space에 있음 || '''ms''' (수십만 cycle)
+|-
+| '''Minor fault (Page Cache)''' || 메모리엔 있는데 PT에 매핑 안 됨 || μs
+|-
+| '''Minor fault (Protection)''' || 권한 충돌 (COW 등) || μs
+|-
+| '''Unallocated''' || 할당된 적 없는 페이지 || segfault
+|}
+
+== Page Table ==
+
+=== HPT (Hierarchical Page Table) ===
+
+x86-64는 4-level (각 9-bit offset):
+* L4 (PML4) → L3 (PDPT) → L2 (PD) → L1 (PT) → PFN
+
+* 장점: '''sparse한 주소 공간을 효율적으로 표현''' (안 쓰는 부분은 entry 자체 없음)
+* 단점: PT walk가 '''4번의 메모리 접근''' 필요 (~400ns)
+
+=== IPT (Inverted Page Table) ===
+
+PFN을 기준으로 하나의 전역 테이블 + hash로 검색.
+
+* 장점: 전체 메모리에 비례하는 작은 크기
+* 단점: hash collision으로 검색 비용 ↑
+
+== MMU 구조 ==
+
+[[img:vm_mmu-33.png|MMU 슬라이드 (도입). VA → MMU → PA.|medium]]
+
+[[img:vm_mmu-34.png|MMU 내부 구조 슬라이드. TLB + PTW + CR3/CR2.|medium]]
+
+<pre class="ascii">
+              ┌─────────────────┐
+        VA →  │      MMU        │  → PA
+              │  ┌───────────┐  │
+              │  │    TLB    │ ←─ 빠른 캐시
+              │  │ (L1+L2)   │  │
+              │  └─────┬─────┘  │
+              │        │ miss   │
+              │        ▼        │
+              │  ┌───────────┐  │
+              │  │    PTW    │ ←─ Page Table 순회
+              │  └─────┬─────┘  │
+              │   ┌────┴────┐   │
+              │   │ CR3/CR2 │ ←─ x86: PT base / fault addr
+              │   └─────────┘   │
+              └─────────────────┘
+</pre>
+
+[[MMU]]는 다음 4가지 이유로 도입됐다:
+# Address translation의 표준화
+# Multi-tasking 시 빠른 context switch (CR3만 바꾸면 됨)
+# Protection (page-level 권한 체크)
+# Sharing (같은 PFN을 여러 VPN에 매핑)
+
+== TLB ==
+
+[[TLB]] 문서 참고. 핵심:
+
+{warn}'''TLB miss ≠ Page fault'''<br>
+· TLB miss: 흔하고 ns 단위 (PTW가 PT 탐색)<br>
+· Page fault: 드물고 ms 단위 (OS 개입, disk I/O){/warn}
+
+== Cache Indexing 방식 ==
+
+[[img:vm_vivt-38.png|PIPT 슬라이드 — Physical Index, Physical Tag|medium]]
+
+캐시가 VA/PA 중 어느 것으로 indexing/tagging 되는지에 따라:
+
+{| class="table"
+! 방식 || Index || Tag || 특징
+|-
+| '''PIPT''' || PA || PA || TLB 후 cache → 느림, 안전
+|-
+| '''VIVT''' || VA || VA || TLB 없이 → 빠름, [[Homonym]]/[[Synonym]] 문제 ⚠
+|-
+| '''VIPT''' || VA || PA || TLB와 L1 병렬 접근 → '''latency hiding'''
+|}
+
+[[img:vm_vivt-39.png|VIVT 슬라이드 — Homonym/Synonym 문제|medium]]
+
+[[img:vm_vivt-40.png|VIPT 슬라이드 — TLB와 cache index 병렬 접근|medium]]
+
+=== VIPT의 제약 ===
+
+Index가 page offset 안에 들어가야 함 → cache 크기 제약:
+<pre>
+Cache 크기 ≤ Associativity × Page 크기
+</pre>
+
+예: 4KB page, 4-way associative → cache 최대 16KB
+
+이걸 넘으려면 [[Page coloring]] 같은 OS 기법 필요.
+
+== VIVT의 두 가지 문제 ==
+
+* '''Homonym''' (동음이의어): 같은 VA → 다른 프로세스에서 다른 PA
+  → 해결: PID/ASID 태그 추가
+* '''Synonym''' (동의어): 다른 VA → 같은 PA (shared memory)
+  → 해결 어려움. alias 검사 필요
+
+== 같이 보기 ==
+* [[TLB]]
+* [[MMU]]
+* [[Page Fault]]
+* [[캐시]]
+`
+},
+
+// ----------------------------------------------------------------
+"TLB": {
+  title: "TLB (Translation Lookaside Buffer)",
+  category: ["메모리 시스템"],
+  body: `
+'''TLB'''(Translation Lookaside Buffer)는 최근에 사용된 PTE(Page Table Entry)를 저장하는 작은 [[캐시]]이다. [[가상 메모리|VA→PA]] 변환을 매번 [[페이지 테이블]] 순회 없이 빠르게 수행하기 위해 존재한다.
+
+[[img:vm_tlb-35.png|TLB 도입 슬라이드|medium]]
+
+== 구조 ==
+
+[[img:vm_tlb-36.png|TLB 구조 슬라이드 — L1 I-TLB + D-TLB, L2 STLB|medium]]
+
+* L1 ITLB (Instruction TLB) + L1 DTLB (Data TLB) — 분리
+* L2 STLB (Shared TLB) — 통합, 더 큼
+
+각 entry는 보통 [[Fully-associative]] 또는 high-way set-associative이다 (수백 개 entry).
+
+[[img:vm_tlb-37.png|TLB miss handling 흐름도|medium]]
+
+== MIPS R3000 TLB Entry 구조 ==
+
+64-bit entry:
+* VPN (20 bits)
+* PFN (20 bits)
+* '''ASID''' (Address Space Identifier) — 프로세스 구분, context switch 시 flush 안 해도 됨
+* N, D, V, G 비트 — non-cacheable, dirty, valid, global
+
+== TLB Miss Handling ==
+
+두 가지 방식:
+
+* '''SW-managed''' (MIPS, Alpha): TLB miss → 예외 발생 → OS 핸들러가 PT 탐색
+* '''HW-managed''' (x86, SPARC, PowerPC): MMU의 [[PTW]]가 자동으로 PT 탐색
+
+{tip}MMU가 도입된 이유 중 하나가 HW-managed TLB miss이다. 매번 OS handler를 호출하면 너무 느리다.{/tip}
+
+== TLB miss vs Page Fault ==
+
+<pre>
+TLB hit  → PA 즉시 사용
+TLB miss → PTW가 PT 검색
+           ├─ PTE 있음 → TLB 채우고 PA 사용 (그냥 TLB miss)
+           └─ PTE 없음 → Page Fault (OS 개입)
+</pre>
+
+{warn}TLB miss는 그 자체로는 page fault가 아니다. TLB miss 처리 후 PTE가 없을 때만 page fault. TLB miss는 흔하고 빠르지만, page fault는 드물고 매우 느리다 (디스크 I/O).{/warn}
+
+== Context Switch와 TLB ==
+
+프로세스를 전환할 때 TLB 처리:
+* 옵션 1: '''전체 flush''' — 단순하지만 매번 cold start
+* 옵션 2: '''ASID 사용''' — 각 entry에 PID 태그 → flush 불필요
+
+대부분의 현대 CPU는 ASID 방식.
+
+== 같이 보기 ==
+* [[가상 메모리]]
+* [[MMU]]
+* [[페이지 테이블]]
+`
+},
+
+// ----------------------------------------------------------------
+"ILP와 TLP": {
+  title: "ILP와 TLP",
+  category: ["병렬성"],
+  body: `
+'''ILP'''(Instruction-Level Parallelism)와 '''TLP'''(Thread-Level Parallelism)는 컴퓨터 구조에서 병렬성을 끌어내는 두 가지 다른 단위(granularity)이다.
+
+== 정의 ==
+
+* '''ILP''': 한 프로그램 내에서 동시에 실행 가능한 명령어의 수
+* '''TLP''': 동시에 실행 가능한 스레드의 수
+
+== 활용 기법 ==
+
+{| class="table"
+! 분류 || ILP || TLP
+|-
+| 활용 기법 || [[파이프라인]], [[슈퍼스칼라]], [[비순차 실행]], [[VLIW]] || [[멀티스레딩]], [[CMP]]
+|-
+| 단위 || 명령어 || 스레드
+|-
+| 한계 || 4~6 wide 슈퍼스칼라에서 평균 IPC ~2 || 스레드 간 공유 자원 경쟁
+|}
+
+== 진화 흐름 ==
+
+# 단일 파이프라인 ([[ILP]] 시작)
+# 슈퍼스칼라 + OoO ([[ILP]] 극대화)
+# → 수확 체감 (diminishing returns)
+# 멀티스레딩 ([[TLP]] 도입)
+# CMP (멀티코어, 본격 [[TLP]])
+# CMP + SMT (현대)
+
+== CMP 정당화 ==
+
+같은 칩 면적 가정 시, 복잡한 슈퍼스칼라 1개보다 '''단순 인오더 코어 여러 개'''가 면적 효율적이다. 이유: OoO 슈퍼스칼라는 ROB/ISQ 등 제어 로직이 칩의 '''약 30%''' 차지.
+
+== 같이 보기 ==
+* [[비순차 실행]]
+* [[멀티스레딩]]
+* [[CMP]]
+`
+},
+
+// ----------------------------------------------------------------
+"CMP": {
+  title: "CMP (Chip Multiprocessor)",
+  category: ["병렬성"],
+  body: `
+'''CMP'''(Chip Multiprocessor) = 단일 칩 위에 여러 프로세서 코어를 물리적으로 복제한 구조. 현대 거의 모든 CPU가 CMP다.
+
+== 등장 동기 ==
+
+[[슈퍼스칼라]] width를 늘려도 [[ILP]]의 수확 체감으로 성능 향상폭이 줄어든다. 대신 코어 자체를 여러 개 만들어 [[TLP]]를 활용하는 게 효율적이라는 결론.
+
+== 슈퍼스칼라 vs CMP ==
+
+{| class="table"
+! || 슈퍼스칼라 || CMP
+|-
+| 방향 || 단일 파이프라인 폭 늘림 || 코어 자체를 복제
+|-
+| 활용 || ILP || TLP
+|-
+| 면적 효율 || OoO 제어 로직 30% 소모 || 연산 유닛/캐시에 집중
+|}
+
+== Simple CMP의 한계 ==
+
+각 코어가 단순 in-order면, 각 코어 내부의 cache miss/branch miss로 underutilization. → 그래서 현대는 '''CMP + SMT''' 결합 (예: 8 core × SMT 2 = 16 logical threads).
+
+== 같이 보기 ==
+* [[멀티스레딩]]
+* [[비순차 실행]]
+* [[ILP와 TLP]]
+`
+},
+
+// ----------------------------------------------------------------
+"자주 틀리는 함정 모음": {
+  title: "자주 틀리는 함정 모음",
+  category: ["FAQ"],
+  body: `
+이 문서는 학생이 [[NotebookLM]] 등 quiz를 풀면서 누적적으로 틀린 함정들을 모은 cheat-sheet이다. 시험 전날 review용.
+
+== MIPS ==
+
+* LW 목적지 = '''rt''' (rd 아님, [[MIPS|I-type]]은 rd 필드 자체가 없다)
+* add 명령어 destination = '''첫 번째 operand''' (마지막 아님)
+* hex digit 경계 ≠ 명령어 필드 경계 → '''반드시 2진수로 펼친 후''' 6/5/5/5/5/6 비트로 자르기
+* SLL은 R-type (funct field 있음)
+* 'u' 접미사 (addu, addiu) = unsigned 아니라 '''overflow 예외 안 던짐'''
+* Big-Endian: 0x12345678 @ 0x100 → 0x100에 '''0x12 (MSB)'''
+
+== Branch / Jump ==
+
+* Branch target = '''PC + 4''' + (sext(imm)<<2) — PC 아님
+* 음수 offset일 때도 +4 잊지 말 것
+* Jump target은 '''(PC+4)[31:28]''' 사용 — imm26만 보는 거 아님
+* BEQ 범위 = '''±128 KB''' (64KB 아님)
+
+== Cache ==
+
+* Direct-mapped 매핑 = '''mod''' (곱셈 아님)
+* Index = 칸 찾기, Tag = 검증, Block offset = byte 선택 — 셋 헷갈리지 말 것
+* Fully-assoc은 '''Conflict miss만''' 제거 (Capacity는 못 막음)
+* Dirty bit = "수정됨, eviction 시 write-back 필요" (Valid bit과 구분)
+* MSHR = '''miss 전용''', hit과 무관
+* Stride prefetcher는 history buffer 필요해서 sequential보다 '''HW 면적 더 큼'''
+
+== Pipeline / Exception ==
+
+* Register write는 항상 '''WB stage''' (EX 아님)
+* Coprocessor 0 = system control (exception), Coprocessor 1 = FPU
+* Vectored interrupt = HW 직접 매핑 (label 검색 ❌ — label은 어셈블 단계에서 사라짐)
+* "improper access to memory" — IF(instruction memory) vs MEM(data memory) 구분
+
+== Performance ==
+
+* CPI가 '''높을수록 느림''' (직관과 반대)
+* 평균 종류: GM = 정규화 비율, HM = rate (IPC/MIPS), AM = 절대값
+* '''P ∝ V² × f''' (frequency는 1차, 제곱은 voltage)
+* IC = ISA+컴파일러, IPC = 마이크로아키텍처 (자주 헷갈림)
+
+== OoO / Superscalar ==
+
+* RAW=진짜, WAR/WAW=가짜(renaming으로 해결), RAR=의존성 아님
+* Speculation 결과는 '''즉시 commit X''' (ROB에 보관 후 검증)
+* Scoreboarding은 데이터 해저드 관리, [[TLB]]/page table과 '''무관'''
+
+== Multithreading / VLIW ==
+
+* TLP는 register file 면적 '''증가''' (감소 아님)
+* VLIW NOP은 '''컴파일 타임에 정적''' 삽입 (런타임 X)
+* SMT = Space Sharing (각 스레드 dedicated core 아님 — 그건 CMP)
+* 공유 자원: Code, Global Data / 개별: Register File, Stack, PC
+
+== Virtual Memory ==
+
+* TLB miss ≠ Page fault (TLB miss 후 PTE 없을 때만 page fault)
+* HPT는 sparse address 효율적, IPT는 hash 기반
+* VIPT는 cache 크기 ≤ associativity × page 크기 제약
+* VIVT의 Homonym = 같은 VA 다른 PA (PID로 해결), Synonym = 다른 VA 같은 PA (해결 어려움)
+
+== 같이 보기 ==
+* [[FAQ]]
+* [[성능 지표]]
+`
+},
+
+// ----------------------------------------------------------------
+"FAQ": {
+  title: "자주 묻는 질문 (FAQ)",
+  category: ["FAQ"],
+  body: `
+== Q. 시험에 [[opcode]] hex 값을 외워야 하나? ==
+
+'''A.''' 아니다. 조교/교수 공지에 따라 reference table이 제공된다. 다만 '''비트 디코딩 절차'''(6/5/5/5/5/6)는 외워야 한다.
+
+== Q. 객관식은 보기 하나만 고르면 되나? ==
+
+'''A.''' '''정답이 1~2개'''인 형식이다. 보기를 잘 읽고, 다 맞는 보기는 다 고를 것. 박스 안에만 답 적기.
+
+== Q. 계산기 가져가야 하나? ==
+
+'''A.''' 안 가져가도 된다. 손계산 가능한 수준으로 출제된다.
+
+== Q. 중간고사 범위도 나오나? ==
+
+'''A.''' 1.5 RECAP, MIPS는 중간 범위였지만 기말에도 출제된다. 명시적으로 포함.
+
+== Q. ch7 (Pipeline Hazards)는 수업 안 했는데 나오나? ==
+
+'''A.''' 시험 범위로 명시되어 있어 '''자습 필요'''. 단, [[Load-Use 해저드]] 같은 핵심 개념 위주.
+
+== Q. PRF (Physical Register File)가 시험에 나오나? ==
+
+'''A.''' 학부 강의에서는 '''graduate class 토픽으로 분류'''되어 디테일은 출제 안 됨. "renaming이 가짜 의존성 제거" 개념만 알면 됨.
+
+== Q. ch13 IO도 시험에 나오나? ==
+
+'''A.''' 2026-05-28 수업에서 [[ch13 IO]] 진도 시작. 정확한 시험 범위 포함 여부는 추가 공지 확인 필요. 일단 진도 나간 것은 [[ch13 IO]] 문서 참고.
+
+== 같이 보기 ==
+* [[자주 틀리는 함정 모음]]
+`
+},
+
+// ----------------------------------------------------------------
+"ch13 IO": {
+  title: "IO Device Management (ch13)",
+  category: ["IO", "메모리 시스템"],
+  body: `
+'''IO Device Management'''는 CPU가 외부 세상(키보드, 디스크, GPU 등)과 데이터를 주고받는 방법을 다루는 단원이다. 2026-05-28 수업에서 시작된 마지막 단원으로, 네 가지 큰 주제로 나뉜다:
+
+# [[CPU-IO Interaction]] — PIO / MMIO / page cache / mmap
+# [[DMA]] (Direct Memory Access) — CPU 우회 데이터 전송
+# [[Doorbell]] — 완료 알림 (Polling vs Interrupt)
+# [[AMBA]] — 칩 내부 통신 표준 (AHB, AXI 등)
+
+{joke}이 단원은 컴퓨터 구조 + OS + 하드웨어 설계가 한 자리에 모이는 종합 격투기 장이다. 그래서 시험 보기 직전에 보면 "왜 이걸 다 알아야 하지?"라는 회의가 들지만, 사실 현대 컴퓨터의 진짜 모습은 여기 다 있다.{/joke}
+
+== 1. CPU와 IO의 만남 ==
+
+컴퓨터는 결국 바깥세상과 통신해야 쓸모가 있다. [[키보드]], [[마우스]], [[디스플레이]] 같은 user interface부터 [[디스크]], [[네트워크]] 같은 data transmission까지.
+
+{tip}'''핵심 문제''': 메모리 버스(GB/s)는 빠르고 IO 버스(MB/s)는 느리다. 약 1000배 차이. 이걸 어떻게 우아하게 다룰 것인가가 이 단원 전체의 주제.{/tip}
+
+[[img:io_hw-04.png|IO 장치는 별도 버스 사용 (메모리 버스 GB/s vs I/O 버스 MB/s). I/O bridge가 중계.|medium]]
+
+* **메모리 버스 (GB/s)**: CPU ↔ DRAM, 매우 빠름
+* **I/O 버스 (MB/s)**: I/O bridge ↔ 디스크/키보드/마우스 등
+* **I/O bridge**: 두 버스 사이의 중계 칩 (속도/프로토콜 변환)
+* 예외: [[GPU]]는 고속 IO ([[PCIe]] 같은 고속 버스 사용)
+
+== 2. Pulling Data: IO Port Registers (PIO) ==
+
+[[PIO]] (Programmed I/O) 또는 '''Port-Mapped I/O''' 방식. 일부 [[ISA]]가 IO 전용 명령어를 제공한다.
+
+=== x86의 IN / OUT 명령어 ===
+
+[[img:io_port-05.png|x86은 device마다 dedicated in/out 레지스터 쌍을 ISA에 내장|medium]]
+
+* **<code>OUT</code>**: GPR의 바이트를 출력 레지스터로
+* **<code>IN</code>**: 입력 레지스터에서 GPR로
+
+=== 장단점 ===
+
+{| class="table"
+! 장점 || 단점
+|-
+| 단순 (IN/OUT 명령어 1개) || 이식성 X (ISA에 박힘)
+|-
+| 낮은 지연 (직접 회로) || 확장성 X (IO 신호 개수 고정)
+|}
+
+[[MIPS]], [[ARM]], [[RISC-V]] 등 현대 RISC ISA는 PIO 안 씀. 대신 [[MMIO]] 사용.
+
+== 3. Pulling Data: MMIO ⭐ ==
+
+[[MMIO]] (Memory-Mapped I/O) = 물리 주소 공간 일부를 IO device의 register에 매핑하는 방식. 일반 LD/ST로 IO 조작 가능.
+
+[[img:io_mmio-07.png|물리 주소 공간의 mmap region이 IO device로 라우팅. LD/ST 명령어로 접근.|medium]]
+
+=== MMIO의 부작용 ⚠ ===
+
+MMIO LD/ST는 device에 의도하지 않은 동작 유발 가능. 일반 메모리에서는 안 일어나는 일.
+
+[[img:io_mmio-08.png|FIFO 기반 device register: STR=push, LDR=pop. 한 번 더 LD하면 데이터 사라짐!|medium]]
+
+{warn}예: device register file이 FIFO로 구현되면:<br>
+· '''STR'''(MMIO addr) = push 한 번<br>
+· '''LDR'''(MMIO addr) = '''pop 한 번 — 데이터 사라짐!'''<br>
+"한 번 더 확인해볼까?" 하고 LDR 두 번 하면 데이터 2개 손실.{/warn}
+
+=== MMIO Caching 금지 ===
+
+MMIO 영역은 [[캐시]]되면 안 됨. cache 값 수정해도 진짜 device는 안 변하니까.
+
+'''해결 3가지''':
+# **<code>clflush</code>**: 명시적으로 cache line 제거
+# **Non-temporal 명령어** (e.g., <code>MOVNT</code>): cache 우회 LD/ST
+# **PTE uncacheable 플래그**: 페이지 단위 cache 금지 ([[가상 메모리]]와 연결)
+
+가장 흔한 방법은 **(3) PTE uncacheable** — OS가 MMIO 페이지 매핑 시 자동 설정.
+
+=== Page Cache (다른 개념!) ⚠ ===
+
+{warn}여기서 "cache"는 '''CPU 캐시가 아니라 OS의 page cache'''. 시험 함정 가능.{/warn}
+
+* **CPU cache** (L1/L2/L3): CPU 내부, HW 관리, MMIO 영역은 금지
+* **Page cache**: '''메인 메모리''' 안에 OS가 두는 디스크 buffer, OS 관리
+
+<code>read()</code>/<code>write()</code> syscall은 page cache에 hit하면 디스크 안 감 → 빠름.
+
+=== mmap() — syscall도 우회 ===
+
+[[img:io_mmap-11.png|mmap된 영역은 user 가상 주소 공간에 직접 박힘. *ptr_f = ...로 포인터처럼 접근.|medium]]
+
+* <code>mmap(file, offset, length)</code> 호출하면 OS가 파일을 user 주소 공간에 매핑
+* 이후 사용자는 '''그냥 포인터로 접근''' → syscall 없음 → context switch 0
+* 페이지 단위로 lazy하게 디스크에서 로드 ([[Demand paging]] 메커니즘 활용)
+
+{tip}'''3단계 IO 추상화 요약''':<br>
+1. read()/write() syscall — context switch 매번<br>
+2. page cache — syscall + 메모리 복사<br>
+3. '''mmap() — syscall 1회만, 이후 직접 포인터 접근'''{/tip}
+
+== 4. DMA — CPU를 운반책에서 해방 ==
+
+[[DMA]] 문서 참고. 핵심:
+
+* CPU가 모든 데이터 이동에 개입하면 비효율 (CPU는 계산해야 함)
+* '''DMA 컨트롤러'''에게 "0xCAFE000에 복사해줘" 위임
+* CPU는 다른 일 가능 → 병렬 처리
+
+[[img:io_dma-14.png|CPU가 DMA에게 위임. DMA가 직접 메모리에 데이터 push.|medium]]
+
+=== DMA Addressing: 가상 주소 사용 ===
+
+DMA가 main memory 접근 시 '''virtual address'''를 쓴다 (physical 아님).
+
+* Driver writer는 가상 포인터처럼 단순하게 다룸
+* Legacy 32-bit device도 64-bit 시스템과 공존 가능 (변환을 [[IOMMU]]가 담당)
+
+=== IOMMU ===
+
+[[IOMMU]] (I/O Memory Management Unit) = '''DMA 전용 [[MMU]]'''.
+
+[[img:io_iommu-17.png|IOMMU는 IO virtual address (IOVA) → physical address 변환. Device마다 private TLB, IOMMU 자체도 IOTLB 보유.|medium]]
+
+* IOVA → PA 변환
+* DMA 작업 '''전에''' PT walk
+* '''IOTLB''' (IO TLB): 빠른 변환을 위한 cache
+
+=== Memory Pinning ===
+
+[[Demand paging]]은 swap in/out 한다. 만약 DMA가 쓰려는 페이지가 swap out 됐다면? 사고.
+
+해결: **Pin** — 해당 메모리를 swap 금지로 표시.
+
+* 커널 함수 <code>mm_mpin()</code> 등으로 pin
+* CUDA의 <code>cudaHostAlloc</code>이 이걸 syscall로 추상화한 것
+
+== 5. Doorbell — 완료 알림 ==
+
+CPU가 다른 일 하는 동안 device가 작업 끝났다는 걸 어떻게 알리는가?
+
+[[img:io_interrupt-22.png|외부 device → IRQ → CPU의 Interrupt control logic → 현재 thread preempt → handler 실행|medium]]
+
+=== Polling vs Interrupt ⭐ ===
+
+{| class="table"
+! || Polling || Interrupt
+|-
+| Doorbell 위치 || Device (CPU가 확인) || CPU (device가 알림)
+|-
+| CPU 부담 || 계속 확인 (busy) || 평소 0
+|-
+| Latency || 매우 낮음 || 약간 있음 (handler 진입)
+|-
+| 적합 || 고빈도/저지연 (네트워크) || 저빈도/긴 latency (디스크)
+|}
+
+=== Polling 예제 (MIPS 어셈블리) ===
+
+<pre>
+_check_keybd: LW    r16  _READY
+              BEQ   r16  r0  _end
+              LW    r3   _DATA
+              JAL   _keystroke_call
+_end:         JR    r31
+</pre>
+
+이 routine을 '''계속 반복 호출'''. 단점: device가 느리면 거의 항상 빈손.
+
+== 6. AMBA — On-chip Bus 표준 ==
+
+현대 [[SoC]]는 한 칩에 수십 개 모듈. 모듈끼리 통신 표준이 필요. [[AMBA]] (Advanced Micro-controller Bus Architecture)가 산업 표준.
+
+=== 5가지 표준 ===
+
+{| class="table"
+! 표준 || 용도
+|-
+| '''CHI''' (Coherent Hub Interface) || 멀티코어 cluster coherency
+|-
+| '''ACE''' (AXI Coherency Extensions) || AXI + 시스템 coherence
+|-
+| '''AXI''' (Advanced eXtensible Interface) || 고성능, 5채널 (OoO 응답)
+|-
+| '''AHB''' (Advanced High-perf Bus) || 64/128 bit, 단일 master AHB-Lite
+|-
+| '''APB''' (Advanced Peripheral Bus) || 저속/저전력 주변장치
+|}
+
+[[img:io_ahb-27.png|AHB는 고대역폭 (CPU↔RAM↔DMA), APB는 저속 주변기기 (UART/Timer/Keypad). 둘 사이는 BRIDGE.|medium]]
+
+=== AHB Single Master ===
+
+* **Manager (Master)**: 트랜잭션 시작
+* **Subordinate (Slave)**: 응답만 (능동적 시작 X)
+* **Decoder**: 주소 보고 어느 slave enable (HSEL_n)
+
+[[img:io_ahb-28.png|Master가 HWDATA/HADDR 보내면, Decoder가 HSEL로 slave 1개 선택, MUX로 응답 라우팅|medium]]
+
+=== Basic Transfer — Pipelined ===
+
+각 transfer = '''Address phase + Data phase'''. 두 phase가 파이프라이닝됨.
+
+[[img:io_ahb-29.png|Address phase와 Data phase가 다른 transaction끼리 겹침 → 완전 pipelined|medium]]
+
+핵심 신호:
+* **HREADY / HREADYOUT**: Slave가 "다음 받을 준비 됐다" 알림
+* HREADY가 LOW이면 master는 address phase 연장 (stall)
+
+[[img:io_ahb-30.png|Slave busy 시 HREADYOUT을 LOW로 → master는 다음 transaction address phase 연장|medium]]
+
+=== Burst Transfers ===
+
+한 transaction이 여러 **beats**(데이터 chunk) 전송. 보통 연속 주소.
+
+* **HSIZE**: 각 beat 크기 (8/16/32/64/128/256 bit)
+* **HBURST**: burst 길이 + 모드
+  * SINGLE / INCR / INCR4 / INCR8 / INCR16
+  * WRAP4 / WRAP8 / WRAP16 (boundary 넘으면 wrap around)
+* **HTRANS**: 각 beat 상태 (NONSEQ / SEQ / BUSY / IDLE)
+
+[[img:io_axi-33.png|HBURST=INCR4 타임라인. BUSY=master 일시 정지, SEQ=정상 진행.|medium]]
+
+{tip}'''WRAP 모드 예시''': 시작 0x38, WRAP4, 32-bit beat → 16 byte boundary (0x30~0x3F) 안에서 wrap → 순서: '''0x38 → 0x3C → 0x30 → 0x34'''. [[캐시]] critical-word-first에 유용.{/tip}
+
+=== AHB Multiple Masters ===
+
+[[img:io_axi-34.png|여러 master 있을 때 Arbiter가 요청 조정 + Data buffers로 임시 저장|medium]]
+
+* '''Arbiter''': 여러 master 요청 중 누가 먼저인지 결정
+* Round-robin, priority 등 정책
+
+=== AXI — 5 채널 동시 ===
+
+AHB와 비슷하지만 '''5개 채널이 동시 작동'''으로 throughput 훨씬 ↑.
+
+[[img:io_axi-35.png|AXI 5 채널: Read addr / Read data / Write addr / Write data / Write response. 각 채널 독립 작동.|medium]]
+
+* OoO 응답 지원 (요청 순서 무관)
+* 여러 outstanding 요청 가능
+* 현대 ARM CPU의 표준
+
+{joke}AHB는 마차길에 비유하면 차 한 대씩, AXI는 5차선 고속도로에 차들이 따로따로 달리는 셈. [[비순차 실행|OoO]] 슈퍼스칼라가 메모리에 여러 요청을 동시에 던지는 걸 가능하게 한 핵심 인프라.{/joke}
+
+== 시험 출제 가능성 (추정) ==
+
+{| class="table"
+! 순위 || 항목 || 이유
+|-
+| 🥇 || MMIO vs PIO 비교 || 단골 개념 비교
+|-
+| 🥇 || MMIO 부작용 + 캐시 금지 3방법 || clflush/non-temp/uncacheable
+|-
+| 🥇 || Polling vs Interrupt || 표 외우기
+|-
+| 🥈 || DMA + IOMMU (가상주소 이유) || [[가상 메모리|ch12]]와 연결
+|-
+| 🥈 || Memory pinning || 좋은 함정거리
+|-
+| 🥈 || Page cache vs CPU cache || 단어 비슷한 함정
+|-
+| 🥉 || AHB HREADY/HTRANS || 타이밍 다이어그램
+|-
+| 🥉 || WRAP vs INCR burst || 디테일
+|-
+| 🥉 || AHB vs AXI 채널 수 || 단순 비교
+|}
+
+== 같이 보기 ==
+* [[MMIO]]
+* [[DMA]]
+* [[IOMMU]]
+* [[Doorbell]]
+* [[AMBA]]
+* [[가상 메모리]]
+* [[캐시]]
+
+{footnotes}
+[1] '''제3자 주의''': IOMMU와 MMU는 둘 다 "MMU"라 헷갈리지만 다른 칩. CPU의 MMU는 CPU 내부, IOMMU는 칩셋/노스브리지 쪽.<br>
+[2] AMBA는 ARM의 표준이지만 라이센스가 무료라 거의 모든 SoC가 사용. ARM이 칩 시장 표준의 95%를 차지하는 데 기여한 숨은 영웅.
+{/footnotes}
+`
+},
+
+// ----------------------------------------------------------------
+"DMA": {
+  title: "DMA (Direct Memory Access)",
+  category: ["IO"],
+  body: `
+'''DMA'''(Direct Memory Access)는 [[CPU]]를 거치지 않고 IO 장치가 직접 메인 메모리에 데이터를 읽고 쓰는 기법이다. CPU가 데이터 운반 일에서 해방되어 계산에 집중할 수 있게 한다.
+
+== 동기 ==
+
+옛날 방식은 모든 데이터 이동에 [[CPU]]가 개입:
+# CPU가 device에서 데이터 pull
+# CPU가 main memory로 push
+# 처리 후 다시 device로
+
+→ CPU는 운반 노예. 계산 자원 낭비.
+
+== 동작 ==
+
+[[img:io_dma-14.png|CPU가 DMA에 "0xCAFE000에 복사해줘" 위임. CPU는 계산, DMA는 데이터 이동.|medium]]
+
+# CPU가 DMA에 "어디서 어디로, 얼마나" 지시 (delegate)
+# DMA가 직접 메모리에 push/pull
+# 완료 시 [[Doorbell|interrupt]]로 알림
+# CPU는 그 사이 다른 계산 수행
+
+== Addressing: Virtual vs Physical ==
+
+DMA는 '''virtual address'''를 사용한다. 이유:
+
+* Driver가 가상 포인터처럼 단순 관리 가능
+* 플랫폼/부팅마다 물리 레이아웃 변해도 OK
+* Legacy 32-bit device가 64-bit 시스템과 공존 가능
+
+→ 변환은 [[IOMMU]]가 담당.
+
+== Memory Pinning ==
+
+[[Demand paging]] 시스템은 swap in/out 한다. DMA가 쓰려는 페이지가 disk로 swap out 됐다면 큰 사고.
+
+해결: '''Pin''' — 해당 메모리 영역을 swap 금지로 표시.
+
+* <code>mm_mpin()</code> 같은 커널 함수
+* CUDA의 <code>cudaHostAlloc</code>이 추상화 예
+
+{warn}Pin한 메모리는 swap 안 되므로 시스템의 가용 메모리를 깎아먹는다. 너무 많이 pin하면 시스템 성능 저하.{/warn}
+
+== 같이 보기 ==
+* [[IOMMU]]
+* [[Doorbell]]
+* [[ch13 IO]]
+`
+},
+
+// ----------------------------------------------------------------
+"IOMMU": {
+  title: "IOMMU (I/O MMU)",
+  category: ["IO", "메모리 시스템"],
+  body: `
+'''IOMMU'''(I/O Memory Management Unit)는 [[DMA]]를 지원하는 IO device를 위한 전용 [[MMU]]이다. IO 가상 주소(IOVA)를 물리 주소로 변환하고 접근 권한을 체크한다.
+
+== 왜 필요한가 ==
+
+[[DMA]]가 [[가상 메모리|virtual address]]를 쓰면 그 변환을 누군가 해야 한다. CPU MMU는 CPU 자신의 요청만 처리 — 그래서 device용 별도 변환기가 필요. 그게 IOMMU.
+
+== 구조 ==
+
+[[img:io_iommu-17.png|Device마다 private TLB, IOMMU 본체도 IOTLB 보유, Memory에는 translation info|medium]]
+
+* **Device + 자기 TLB**: 자주 쓰는 IOVA→PA 매핑 캐시
+* **IOMMU + IOTLB**: 전체 device들 공통 캐시
+* **Memory**: 실제 translation info + access control
+
+== CPU MMU vs IOMMU ==
+
+{| class="table"
+! || CPU MMU || IOMMU
+|-
+| 누구를 위해 || CPU || DMA-supported devices
+|-
+| 변환 || VA → PA || IOVA → PA
+|-
+| TLB || I-TLB, D-TLB, STLB || '''IOTLB'''
+|-
+| 보호 || 프로세스 간 || 디바이스 간
+|}
+
+== 같이 보기 ==
+* [[DMA]]
+* [[MMU]]
+* [[가상 메모리]]
+* [[TLB]]
+`
+},
+
+// ----------------------------------------------------------------
+"MMIO": {
+  title: "MMIO (Memory-Mapped IO)",
+  category: ["IO"],
+  body: `
+'''MMIO'''(Memory-Mapped I/O)는 [[CPU]]가 IO device의 register를 일반 메모리 주소처럼 접근하는 방식이다. 별도의 IO 명령어 ([[PIO|IN/OUT]]) 없이 LD/ST만으로 IO 조작 가능.
+
+== 동작 ==
+
+[[img:io_mmio-07.png|물리 주소 공간의 일부 (mmap region)를 device register에 매핑. LD/ST가 그 주소로 가면 device에 라우팅.|medium]]
+
+물리 주소 공간을 두 영역으로 나눔:
+* '''mmap region''': IO device의 register와 1:1 매핑
+* '''Main memory region''': 일반 DRAM
+
+LD/ST 명령어는 주소 보고 자동으로 어느 쪽인지 판단 (HW가 처리).
+
+== 부작용 ⚠ ==
+
+MMIO LD/ST는 device에 '''의도하지 않은 동작''' 유발 가능.
+
+[[img:io_mmio-08.png|FIFO 기반 device register: STR=push, LDR=pop. LDR이 단순 read가 아님!|medium]]
+
+* <code>STR mmio_addr, val</code> → FIFO에 push
+* <code>LDR mmio_addr</code> → '''FIFO에서 pop''' (데이터 영구 손실!)
+
+{warn}디버깅 중 "값 한 번 더 확인해볼까?" 하고 LDR 두 번 = 데이터 2개 손실. MMIO 코드 짤 때는 LD/ST 횟수를 정확히 통제해야 한다.{/warn}
+
+== Caching 금지 ==
+
+MMIO 영역은 [[캐시]]되면 안 됨:
+* Cache 값 업데이트 → 진짜 device에 안 전달 (cache는 CPU 쪽)
+* LD가 cache hit → 진짜 device read 안 함
+
+'''해결 3가지''':
+# **<code>clflush</code>**: 명시적 cache line flush
+# **Non-temporal 명령어** (e.g., x86 <code>MOVNT</code>): cache 우회
+# **PTE uncacheable 플래그**: 페이지 단위 cache 금지 (보통 OS가 자동 설정)
+
+== MMIO vs PIO 비교 ==
+
+{| class="table"
+! || PIO (IN/OUT) || MMIO
+|-
+| 명령어 || 전용 (x86 IN/OUT) || 범용 LD/ST
+|-
+| 주소 공간 || 별도 IO space || 통합 (메모리와 같은 공간)
+|-
+| ISA 변경 || 필요 || 불필요
+|-
+| 확장성 || 나쁨 || 좋음
+|-
+| 대표 ISA || x86 (양쪽 다 지원) || [[MIPS]], [[ARM]], [[RISC-V]]
+|}
+
+== 같이 보기 ==
+* [[ch13 IO]]
+* [[PIO]]
+* [[mmap]]
+`
+},
+
+// ----------------------------------------------------------------
+"Doorbell": {
+  title: "Doorbell (Polling vs Interrupt)",
+  category: ["IO"],
+  body: `
+'''Doorbell'''은 device 작업 완료를 [[CPU]]가 알아채는 메커니즘이다. 비유하자면 택배 기사가 "초인종"을 누르는 것. 두 가지 방식이 있다: '''Polling'''과 '''Interrupt'''.
+
+== Polling IO ==
+
+CPU가 device의 status flag를 '''계속 들여다봄''' (peek).
+
+=== 예제: 키보드 ===
+
+키보드에 2개 mmap register:
+* <code>READY</code>: 데이터 준비되면 set
+* <code>DATA</code>: keystroke 데이터
+
+MIPS 어셈블리:
+<pre>
+_check_keybd: LW    r16  _READY
+              BEQ   r16  r0  _end
+              LW    r3   _DATA
+              JAL   _keystroke_call
+_end:         JR    r31
+</pre>
+
+이 routine을 '''계속 반복 호출'''.
+
+=== 단점 ===
+* CPU 시간 낭비 (대부분 헛수고)
+* Device가 느리면 효율 ↓
+
+=== 적합한 경우 ===
+* '''Latency-sensitive''' (지연 못 참는) 이벤트
+* 예: 고속 네트워크 패킷 처리
+
+== Interrupt IO ==
+
+[[img:io_interrupt-22.png|외부 device → IRQ → CPU의 Interrupt control logic → 현재 thread preempt → handler 실행|medium]]
+
+Device가 [[IRQ]] (Interrupt ReQuest) 신호로 CPU에 알림. CPU는 자기 일 하다 신호 받고 즉시 핸들러로 전환.
+
+=== 동작 ===
+# Device가 IRQ 보냄
+# CPU interrupt control logic이 받음
+# 현재 thread preempt
+# IRQ handler 실행 (device driver의 일부)
+# 끝나면 원래 thread 복귀
+
+=== 적합한 경우 ===
+* '''드물게 발생'''하는 이벤트 (키보드 입력 등)
+* '''Long latency''' 작업 ([[DMA]] 완료 등)
+
+== 비교 ⭐ ==
+
+{| class="table"
+! || Polling || Interrupt
+|-
+| Doorbell 위치 || Device || CPU
+|-
+| CPU 부담 || 계속 확인 (busy) || 평소 0
+|-
+| Latency || 매우 낮음 || handler 진입 비용
+|-
+| 적합 || 고빈도/저지연 || 저빈도/긴 latency
+|-
+| 예 || 고속 네트워크 || 키보드, 디스크
+|}
+
+{joke}Polling은 "택배 언제 와요?"를 1초마다 묻는 사람, Interrupt는 초인종 울릴 때까지 자기 할 일 하는 사람. 그래서 보통 Interrupt가 평화롭다.{/joke}
+
+== 같이 보기 ==
+* [[파이프라인 예외]] — interrupt 메커니즘 자체
+* [[ch13 IO]]
+`
+},
+
+// ----------------------------------------------------------------
+"AMBA": {
+  title: "AMBA (Advanced Micro-controller Bus Architecture)",
+  category: ["IO"],
+  body: `
+'''AMBA'''(Advanced Micro-controller Bus Architecture)는 [[ARM]]이 제정한 on-chip 통신 표준 모음이다. 단일 프로토콜이 아니라 용도별 5종 컬렉션.
+
+== 5가지 표준 ==
+
+{| class="table"
+! 표준 || 풀네임 || 용도
+|-
+| '''CHI''' || Coherent Hub Interface || 멀티코어 cluster coherency
+|-
+| '''ACE''' || AXI Coherency Extensions || AXI + 시스템 coherence
+|-
+| '''AXI''' || Advanced eXtensible Interface || 고성능, 5채널 (OoO 응답)
+|-
+| '''AHB''' || Advanced High-perf Bus || 64/128 bit
+|-
+| '''APB''' || Advanced Peripheral Bus || 저속/저전력 주변장치
+|}
+
+[[img:io_ahb-27.png|AHB는 고대역폭 (CPU↔RAM↔DMA), APB는 저속 주변기기 (UART/Timer/Keypad). 둘 사이는 BRIDGE.|medium]]
+
+== AHB ==
+
+=== Single Master 구성 ===
+
+[[img:io_ahb-28.png|Master가 HWDATA/HADDR 보내면 Decoder가 HSEL로 slave 1개 선택|medium]]
+
+* '''Manager (Master)''': 트랜잭션 시작
+* '''Subordinate (Slave)''': 응답만 (proactive 시작 X)
+* '''Decoder''': 주소 → 어느 slave 선택할지 (HSEL_n)
+
+=== Basic Transfer ===
+
+각 transfer는 Address phase + Data phase로 나뉘고, 두 phase가 '''파이프라이닝'''됨.
+
+[[img:io_ahb-29.png|이전 transaction의 Data phase와 다음 transaction의 Address phase가 같은 cycle에 진행|medium]]
+
+핵심 신호: '''HREADY''' — slave가 "받을 준비 됐다" 알림. LOW이면 master는 address phase 연장 (stall).
+
+[[img:io_ahb-30.png|Slave busy 시 HREADYOUT을 LOW로 → master는 다음 transaction을 stall|medium]]
+
+=== Burst Transfers ===
+
+한 transaction이 여러 **beats** 전송. 연속 주소 데이터.
+
+* '''HSIZE''': 각 beat 크기
+* '''HBURST''': burst 길이 + 모드
+  * SINGLE / INCR (불정량) / INCR4/8/16 (정량)
+  * WRAP4/8/16 (boundary 넘으면 wrap around)
+* '''HTRANS''': beat 상태 (NONSEQ/SEQ/BUSY/IDLE)
+
+[[img:io_axi-33.png|HBURST=INCR4 타임라인. BUSY = master 일시 정지.|medium]]
+
+=== Multiple Masters ===
+
+[[img:io_axi-34.png|Arbiter가 여러 master 요청 조정. Data buffers로 임시 저장.|medium]]
+
+* '''Arbiter''': 누가 먼저인지 결정 (Round-robin, priority)
+
+== AXI ==
+
+[[img:io_axi-35.png|AXI 5 채널: Read addr / Read data / Write addr / Write data / Write response. 모두 독립.|medium]]
+
+AHB와 비슷하지만 '''5개 채널 동시''' → throughput 폭증.
+
+* OoO 응답 지원 (요청 순서 무관)
+* 여러 outstanding 요청
+* 현대 ARM CPU 표준
+
+== AHB vs AXI ==
+
+{| class="table"
+! || AHB || AXI
+|-
+| 채널 수 || 1 (공유) || '''5 (독립)'''
+|-
+| 동시성 || 제한적 (pipelined) || 매우 높음
+|-
+| OoO 응답 || 어려움 || '''지원'''
+|-
+| Outstanding || 1개 || 여러 개
+|}
+
+== 같이 보기 ==
+* [[ch13 IO]]
+* [[비순차 실행]]
+`
+},
+
+// ----------------------------------------------------------------
+"CPU-IO Interaction": {
+  title: "CPU-IO Interaction",
+  category: ["IO"],
+  body: `
+[[ch13 IO]] 단원의 첫 챕터. CPU가 IO device와 데이터를 주고받는 방법을 다룬다. 자세한 내용은 [[ch13 IO]] 참고.
+
+핵심 방법 두 가지:
+* [[PIO]] (Port-Mapped IO) — x86의 IN/OUT
+* [[MMIO]] (Memory-Mapped IO) — 일반 LD/ST 사용 (현대 표준)
+
+추가로:
+* [[mmap]] — file을 user 주소 공간에 매핑
+
+== 같이 보기 ==
+* [[ch13 IO]]
+`
+},
+
+// ----------------------------------------------------------------
+"PIO": {
+  title: "PIO (Port-Mapped IO)",
+  category: ["IO"],
+  body: `
+'''PIO'''(Port-Mapped I/O, Programmed I/O)는 [[ISA]]가 전용 IO 명령어를 제공하는 방식이다. x86의 IN/OUT 명령어가 대표 예.
+
+[[img:io_port-05.png|x86은 device마다 dedicated in/out 레지스터 쌍을 ISA에 내장|medium]]
+
+== 장단점 ==
+* ✅ 단순, 낮은 지연
+* ❌ 이식성/확장성 나쁨 (ISA에 박힘)
+
+→ 현대 RISC ISA는 [[MMIO]] 사용.
+
+== 같이 보기 ==
+* [[MMIO]]
+* [[ch13 IO]]
+`
+},
+
+// ----------------------------------------------------------------
+"mmap": {
+  title: "mmap (Memory-Mapped File)",
+  category: ["IO"],
+  body: `
+'''mmap'''은 파일을 사용자 가상 주소 공간에 직접 매핑하는 syscall이다. 매핑 후에는 <code>*ptr = ...</code> 같은 일반 포인터 접근으로 파일을 읽고 쓸 수 있다 → syscall 오버헤드 0.
+
+[[img:io_mmap-11.png|mmap된 영역은 user 가상 주소 공간 일부. 디스크 파일이 거기 보임.|medium]]
+
+== 왜 빠른가 ==
+
+기존 <code>read()</code>/<code>write()</code> syscall:
+* 매번 user ↔ kernel '''context switch''' → 비쌈
+* 데이터를 user buffer로 복사
+
+mmap:
+* mmap() 호출 시 1회만 syscall
+* 이후 access는 그냥 메모리 access (페이지 단위 lazy load)
+* [[Demand paging]] 메커니즘 활용
+
+== 사용 예 ==
+* 대용량 파일 처리
+* IPC (shared memory)
+* MMIO와 결합 (디바이스 메모리를 user space로)
+
+== 같이 보기 ==
+* [[가상 메모리]]
+* [[Demand paging]]
+* [[ch13 IO]]
+`
+},
+
+// ----------------------------------------------------------------
+// 짧은 stub 문서들 — cross-link 네트워크 채우기용
+// ----------------------------------------------------------------
+
+"ROB": {
+  title: "ROB (Reorder Buffer)",
+  category: ["고급 마이크로아키텍처"],
+  body: `
+'''ROB'''(Reorder Buffer)는 [[비순차 실행|OoO]] 슈퍼스칼라에서 결과를 '''원래 프로그램 순서로 commit''' 하기 위한 데이터 구조이다. 또한 '''instruction window'''라고도 불린다.
+
+== 핵심 역할 ==
+* 모든 명령어는 fetch 후 ROB에 entry 받음
+* 비순차 실행은 OK, 하지만 retire(commit)는 ROB head부터 in-order
+* [[Speculation]] 실패 시 ROB가 rollback의 기준점
+
+== 왜 필수인가 ==
+* [[파이프라인 예외|Precise exception]] 보장 — 예외 발생 시 깔끔한 program state
+* 분기 예측 실패 시 잘못 실행된 명령어 flush
+
+ROB는 옵션이 아니라 OoO의 '''필수''' 컴포넌트.
+
+== 같이 보기 ==
+* [[비순차 실행]]
+* [[ISQ]]
+* [[LSQ]]
+`
+},
+
+"ISQ": {
+  title: "ISQ (Issue Queue)",
+  category: ["고급 마이크로아키텍처"],
+  body: `
+'''ISQ'''(Issue Queue)는 [[레지스터 리네이밍|rename]]된 명령어들을 source operand와 자원이 ready 될 때까지 보관하는 큐이다. Ready인 순간 실행 유닛으로 발행(issue).
+
+== ROB와의 관계 ==
+* '''ISQ''': 발행 관리 (issue readiness)
+* '''[[ROB]]''': 완료 관리 (commit ordering)
+
+둘이 서로의 상태를 추적하며 협력.
+
+== 함정 ==
+{warn}ISQ는 분기 목적지 예측이나 가상 메모리 주소 변환과 무관. 이건 [[Branch Predictor]]나 [[페이지 테이블]]/[[TLB]] 영역.{/warn}
+
+== 같이 보기 ==
+* [[ROB]]
+* [[비순차 실행]]
+`
+},
+
+"LSQ": {
+  title: "LSQ (Load/Store Queue)",
+  category: ["고급 마이크로아키텍처"],
+  body: `
+'''LSQ'''(Load/Store Queue)는 메모리 [[일관성]]을 위해 store 값을 [[ROB]] retire 전까지 보관하는 큐이다. Load는 LSQ와 데이터 메모리를 병렬 검색해 가장 최신 데이터를 forward.
+
+[[ROB]]가 register write를 in-order로 관리한다면, LSQ는 memory write를 in-order로 관리한다.
+
+== 같이 보기 ==
+* [[ROB]]
+* [[비순차 실행]]
+`
+},
+
+"레지스터 리네이밍": {
+  title: "레지스터 리네이밍 (Register Renaming)",
+  category: ["고급 마이크로아키텍처"],
+  body: `
+'''레지스터 리네이밍'''(Register Renaming)은 [[비순차 실행|OoO]]에서 '''가짜 의존성''' (WAR, WAW)을 제거하는 핵심 기법이다.
+
+== 원리 ==
+컴파일러가 본 [[아키텍처 레지스터]] 이름(예: $t0)을 하드웨어 내부에서 매번 새 이름으로 매핑한다. 같은 $t0이라도 시점마다 다른 내부 이름을 가지므로, 이름 충돌이 사라진다.
+
+== 효과 ==
+{| class="table"
+! 의존성 || Renaming 효과
+|-
+| RAW (진짜) || 그대로 (renaming 불가)
+|-
+| WAR (가짜) || '''제거됨'''
+|-
+| WAW (가짜) || '''제거됨'''
+|}
+
+== 같이 보기 ==
+* [[비순차 실행]]
+* [[ROB]]
+`
+},
+
+"Demand paging": {
+  title: "Demand Paging",
+  category: ["메모리 시스템"],
+  body: `
+'''Demand Paging'''은 [[가상 메모리]] 시스템에서 페이지를 '''접근 시점에 비로소''' 메모리에 가져오는 방식이다. 프로그램 시작 시 모든 페이지를 메모리에 올리지 않는다.
+
+== 동작 ==
+# 페이지 접근 → [[TLB]] miss → [[페이지 테이블]] 검색
+# PTE가 valid가 아니면 → [[Page Fault]] → OS 개입
+# OS가 swap space(disk)에서 페이지 로드
+# PTE 업데이트, TLB 갱신, 원래 명령어 재실행
+
+== 장점 ==
+* 메모리 절약 (안 쓰는 페이지는 안 올림)
+* Lazy allocation 가능
+* [[mmap]] 같은 기능의 기반
+
+== 비용 ==
+* Page fault는 ms 단위 (디스크 I/O) → '''매우 비쌈'''
+
+== 같이 보기 ==
+* [[가상 메모리]]
+* [[Page Fault]]
+* [[mmap]]
+`
+},
+
+"Page Fault": {
+  title: "Page Fault",
+  category: ["메모리 시스템"],
+  body: `
+'''Page Fault'''는 접근한 가상 페이지가 메모리에 없거나 PTE가 invalid일 때 발생하는 [[파이프라인 예외|예외]]이다. OS가 개입해 처리한다.
+
+== 종류 ==
+
+{| class="table"
+! 종류 || 원인 || 비용
+|-
+| '''Major fault''' || page가 swap space (디스크)에 있음 || ms
+|-
+| '''Minor fault (Page Cache)''' || 메모리엔 있는데 PT에 매핑 안 됨 || μs
+|-
+| '''Minor fault (Protection)''' || 권한 충돌 (COW 등) || μs
+|-
+| '''Unallocated''' || 할당된 적 없는 페이지 || segfault
+|}
+
+== TLB miss와 구분 ==
+
+{warn}'''TLB miss ≠ Page Fault'''<br>
+· TLB miss: PT에 PTE가 있는데 TLB cache miss. ns 단위, 흔함.<br>
+· Page fault: PT에도 PTE 없음. ms 단위, 드뭄, OS 개입.{/warn}
+
+== 같이 보기 ==
+* [[가상 메모리]]
+* [[Demand paging]]
+* [[TLB]]
+`
+},
+
+"MMU": {
+  title: "MMU (Memory Management Unit)",
+  category: ["메모리 시스템"],
+  body: `
+'''MMU'''(Memory Management Unit)는 CPU 내부에 있는 [[가상 메모리|VA → PA]] 변환 전용 하드웨어이다.
+
+== 구성 요소 ==
+* '''[[TLB]]''': 최근 PTE 캐시
+* '''PTW (Page Table Walker)''': TLB miss 시 [[페이지 테이블]] 순회 회로
+* '''CR3 / CR2''' (x86) 또는 '''CP0 reg 4/5''' (MIPS): PT base address, fault address 등
+
+== 도입 이유 4가지 ==
+# Address translation의 HW 표준화
+# Multi-tasking 빠른 context switch (CR3만 바꿈)
+# Protection (페이지 단위 권한 체크)
+# Sharing (같은 PFN을 여러 VPN에 매핑)
+
+== IOMMU와 구분 ==
+* '''MMU''': CPU용
+* '''[[IOMMU]]''': [[DMA]] device용 (별도 칩)
+
+== 같이 보기 ==
+* [[가상 메모리]]
+* [[TLB]]
+* [[IOMMU]]
+`
+},
+
+"Forwarding": {
+  title: "Forwarding (Bypassing)",
+  category: ["파이프라인"],
+  body: `
+'''Forwarding'''(또는 Bypassing)은 [[파이프라인]]에서 [[데이터 해저드]]를 해결하는 가장 흔한 기법이다. 명령어의 결과를 WB stage까지 기다리지 않고 EX/MEM stage 끝에서 바로 다음 명령어의 EX 입력으로 전달한다.
+
+== 한계 ==
+일부 hazard는 forwarding으로 해결 불가:
+* [[Load-Use 해저드]]: LW 결과는 MEM 끝에서 나오는데 다음 ADD의 EX는 같은 cycle → forwarding 불가 → '''1 cycle stall 필수'''
+
+== 같이 보기 ==
+* [[데이터 해저드]]
+* [[Load-Use 해저드]]
+`
+},
+
+"데이터 해저드": {
+  title: "데이터 해저드 (Data Hazard)",
+  category: ["파이프라인"],
+  body: `
+'''데이터 해저드'''(Data Hazard)는 [[파이프라인]]에서 앞 명령어의 결과를 뒤 명령어가 사용하려 할 때 발생하는 문제이다. 가장 흔한 종류는 RAW (Read After Write).
+
+== 해결 ==
+# '''[[Forwarding]]''': 대부분의 경우 결과를 우회 전달
+# '''[[Load-Use 해저드|Stall]]''': forwarding 불가능 시 NOP 삽입
+
+== OoO와의 관계 ==
+[[비순차 실행|OoO]]에서는 WAR/WAW도 등장 (가짜 의존성). [[레지스터 리네이밍]]으로 제거.
+
+== 같이 보기 ==
+* [[Load-Use 해저드]]
+* [[Forwarding]]
+* [[비순차 실행]]
+`
+},
+
+"지역성": {
+  title: "지역성 (Locality)",
+  category: ["메모리 시스템"],
+  body: `
+'''지역성'''(Locality)은 [[캐시]]가 효과를 발휘하는 근본 원리이다.
+
+== 두 종류 ==
+* '''Temporal locality''' (시간 지역성): 최근에 쓴 데이터는 곧 또 쓸 가능성 ↑
+  * 예: loop의 induction variable
+* '''Spatial locality''' (공간 지역성): 어떤 주소를 쓰면 그 근처 주소도 곧 쓸 가능성 ↑
+  * 예: 배열 순회
+
+캐시는 둘 다 활용. 블록 단위로 가져오는 건 spatial을, 자주 쓰는 블록을 유지하는 건 temporal을 노림.
+
+== 같이 보기 ==
+* [[캐시]]
+* [[AMAT]]
+`
+},
+
+"IRQ": {
+  title: "IRQ (Interrupt ReQuest)",
+  category: ["파이프라인", "IO"],
+  body: `
+'''IRQ'''(Interrupt ReQuest)는 외부 device가 CPU에 보내는 인터럽트 요청 신호이다. CPU는 IRQ를 받으면 현재 thread를 preempt하고 interrupt handler로 점프한다.
+
+== Doorbell과의 관계 ==
+[[Doorbell]] 메커니즘 중 '''Interrupt''' 방식이 IRQ를 사용한다 (vs Polling).
+
+== 같이 보기 ==
+* [[파이프라인 예외]]
+* [[Doorbell]]
+* [[ch13 IO]]
+`
+},
+
+"코프로세서": {
+  title: "코프로세서 (Coprocessor)",
+  category: ["ISA", "MIPS"],
+  body: `
+[[MIPS]]에서 '''코프로세서'''(Coprocessor)는 메인 ALU 외의 보조 처리 유닛이다.
+
+== 종류 ==
+* '''CP0''': System Control — exception/interrupt 처리, EPC/Cause/Status register 보유
+* '''CP1''': FPU (Floating-Point Unit)
+
+{warn}함정 단골: "인터럽트 처리는 어디?" → '''CP0''' (CP1은 부동소수점!){/warn}
+
+== 같이 보기 ==
+* [[파이프라인 예외]]
+* [[MIPS]]
+`
+},
+
+"하이퍼스레딩": {
+  title: "하이퍼스레딩 (Hyper-Threading)",
+  category: ["병렬성"],
+  body: `
+'''하이퍼스레딩'''(Hyper-Threading)은 Intel이 구현한 [[SMT]] (Simultaneous Multithreading)이다. 하나의 물리 코어가 OS에게 2개의 logical core처럼 보이게 함.
+
+== 동작 ==
+같은 cycle에 두 스레드의 명령어를 동시 발행 → [[멀티스레딩|horizontal/vertical waste]] 활용.
+
+* 예: 4-wide superscalar에서 한 thread가 2 slot만 채우면, 나머지 2 slot을 다른 thread가 사용
+
+== 효과 ==
+보통 단일 thread 대비 시스템 throughput 20~30% 향상.
+
+== 같이 보기 ==
+* [[멀티스레딩]]
+* [[비순차 실행]]
+`
+},
+
+"IPC": {
+  title: "IPC (Instructions Per Cycle)",
+  category: ["성능", "RECAP"],
+  body: `
+'''IPC'''(Instructions Per Cycle)는 한 cycle에 평균적으로 처리되는 명령어 수이다. '''[[CPI]]의 역수''' (IPC = 1/CPI).
+
+== 무엇이 결정하나 ==
+'''마이크로아키텍처'''. [[파이프라인]] 깊이, [[비순차 실행|OoO]] 여부, [[슈퍼스칼라]] width 등 HW 설계가 결정.
+
+{warn}함정: "컴파일러와 ISA가 IPC 결정" → '''거짓'''. IC가 그렇게 결정되고, IPC는 마이크로아키텍처 영역.{/warn}
+
+== 측정 ==
+* 단일 발행 in-order: IPC ≤ 1
+* 4-wide OoO 슈퍼스칼라: IPC 평균 ~2 (이론적 max 4지만)
+
+== 같이 보기 ==
+* [[CPI]]
+* [[성능 지표]]
+`
+},
+
+"CPI": {
+  title: "CPI (Cycles Per Instruction)",
+  category: ["성능", "RECAP"],
+  body: `
+'''CPI'''(Cycles Per Instruction)는 명령어 하나에 평균적으로 걸리는 cycle 수이다. '''[[IPC]]의 역수'''.
+
+== CPU Time 공식 ==
+<pre>
+CPU Time = IC × CPI × T_cycle = IC × CPI / f
+</pre>
+
+{warn}직관 함정: "CPI = 효율이니까 높을수록 좋다" → '''거짓'''. CPI가 높을수록 한 명령어에 cycle 많이 씀 → '''느림'''.{/warn}
+
+== 가중평균 ==
+프로그램의 명령어 종류별 CPI가 다를 때:
+<pre>
+CPI = Σ(ratio_i × CPI_i)
+</pre>
+
+== 같이 보기 ==
+* [[IPC]]
+* [[성능 지표]]
+`
+},
+
+"MESI": {
+  title: "MESI 프로토콜",
+  category: ["메모리 시스템", "병렬성"],
+  body: `
+'''MESI'''는 [[MSI 프로토콜|MSI]]에 '''Exclusive''' 상태를 추가한 [[캐시 일관성]] 프로토콜이다. MSI의 가장 큰 단점인 "혼자만 읽는 블록도 BusRdX 발생"을 해결.
+
+== 4가지 상태 ==
+* '''M (Modified)''': 이 코어만 보유, dirty
+* '''E (Exclusive)''': 이 코어만 보유, clean (메모리와 동일)
+* '''S (Shared)''': 여러 코어 보유, clean
+* '''I (Invalid)''': 없음
+
+== MSI 대비 장점 ==
+혼자 읽고 있을 때 (E 상태), 쓰기 발생 시 BusRdX 없이 바로 M으로 전이 가능 → bus traffic 감소.
+
+== 같이 보기 ==
+* [[MSI 프로토콜]]
+* [[캐시]]
+`
+},
+
+"ILP": {
+  title: "ILP (Instruction-Level Parallelism)",
+  category: ["병렬성"],
+  body: `
+[[ILP와 TLP]] 문서 참고.
+
+== 간단 정의 ==
+한 프로그램 내에서 동시 실행 가능한 명령어 수.
+
+== 활용 기법 ==
+* [[파이프라인]]
+* [[슈퍼스칼라]]
+* [[비순차 실행|OoO]]
+* [[VLIW]]
+
+== 한계 ==
+프로그램 내 데이터 의존성, 분기 예측 실패로 평균 IPC ~2 정체.
+
+== 같이 보기 ==
+* [[ILP와 TLP]]
+* [[TLP]]
+`
+},
+
+"TLP": {
+  title: "TLP (Thread-Level Parallelism)",
+  category: ["병렬성"],
+  body: `
+[[ILP와 TLP]] 문서 참고.
+
+== 간단 정의 ==
+동시 실행 가능한 [[스레드]] 수.
+
+== 활용 기법 ==
+* [[멀티스레딩]] (FGMT/CGMT/SMT)
+* [[CMP]] (멀티코어)
+
+== 같이 보기 ==
+* [[ILP와 TLP]]
+* [[ILP]]
+`
+},
+
+"SoC": {
+  title: "SoC (System-on-Chip)",
+  category: ["IO"],
+  body: `
+'''SoC'''(System-on-Chip)는 [[CPU]], [[GPU]], NPU, ISP, 메모리 컨트롤러, IO 컨트롤러 등 시스템 전체를 단일 칩에 통합한 설계이다.
+
+대표 예: Apple [[M1]]/M2/M3/M4, Qualcomm Snapdragon, Samsung Exynos.
+
+== 통신 ==
+SoC 내 모듈끼리는 [[AMBA]] 같은 on-chip bus 표준으로 통신.
+
+== 같이 보기 ==
+* [[AMBA]]
+* [[ch13 IO]]
+`
+},
+
+"Conflict miss": {
+  title: "Conflict Miss",
+  category: ["메모리 시스템"],
+  body: `
+'''Conflict miss'''는 같은 [[캐시]] index에 매핑되는 블록끼리 자리 경쟁으로 발생하는 miss이다. Direct-mapped와 Set-Associative에서만 발생.
+
+* [[Fully-Associative]] 캐시에서는 발생 안 함 (어느 자리든 가능)
+* Capacity miss와 구분 — Fully-assoc도 capacity miss는 못 막음
+
+[[캐시]]의 3C miss 모델 참고.
+
+== 같이 보기 ==
+* [[캐시]]
+`
+},
+
+"Tag": {
+  title: "Tag (캐시)",
+  category: ["메모리 시스템"],
+  body: `
+[[캐시]] 주소의 상위 비트로, 해당 블록이 요청 주소와 일치하는지 검증하는 신분증 역할.
+
+* Index와 Block offset에 쓰이지 않는 비트들이 Tag
+* 캐시 hit 조건: '''요청 Tag == 저장 Tag AND Valid bit == 1'''
+
+== 같이 보기 ==
+* [[캐시]]
+* [[Valid bit]]
+`
+},
+
+"Valid bit": {
+  title: "Valid Bit",
+  category: ["메모리 시스템"],
+  body: `
+[[캐시]] 블록이 유효한 데이터를 담고 있는지를 나타내는 1비트.
+
+* Valid=0: 그 자리에 의미 있는 데이터 없음 (cold start나 invalidation 후)
+* Valid=1: 유효 데이터
+
+{warn}'''[[Dirty bit]]와 혼동 X'''. Dirty bit는 "수정됨", Valid bit는 "유효함". 다른 비트.{/warn}
+
+== 같이 보기 ==
+* [[캐시]]
+* [[Tag]]
+`
+},
+
+"Snooping": {
+  title: "Snooping",
+  category: ["메모리 시스템", "병렬성"],
+  body: `
+'''Snooping'''은 [[캐시 일관성]] 유지를 위해 각 [[캐시]] 컨트롤러가 공유 bus 트래픽을 '''엿듣는''' 기법이다. 다른 코어의 read/write가 자기 캐시 블록과 관련 있는지 감지해 적절히 반응.
+
+[[MSI 프로토콜]], [[MESI]]는 모두 snooping 기반.
+
+== 같이 보기 ==
+* [[MSI 프로토콜]]
+* [[캐시]]
+`
+},
+
+"AMAT": {
+  title: "AMAT",
+  category: ["메모리 시스템"],
+  body: `
+'''AMAT'''(Average Memory Access Time) = 평균 메모리 접근 시간.
+
+<pre>
+AMAT = Hit Time + Miss Rate × Miss Penalty
+</pre>
+
+다중 레벨:
+<pre>
+AMAT_L1 = HitTime_L1 + MR_L1 × (HitTime_L2 + MR_L2 × MissPenalty_L2)
+</pre>
+
+== 최적화 방향 ==
+* Hit Time ↓ → 작은 L1, 단순 매핑
+* Miss Rate ↓ → 큰 cache / set-assoc / prefetch
+* Miss Penalty ↓ → L2/L3 추가, write buffer
+
+== 같이 보기 ==
+* [[캐시]]
+* [[지역성]]
+`
+},
+
+"Fully-associative": {
+  title: "Fully-Associative Cache",
+  category: ["메모리 시스템"],
+  body: `
+[[캐시]] 매핑 방식 중 하나. 어떤 메모리 블록이든 캐시 내 '''아무 자리'''에 들어갈 수 있다 (set=1, way=전체 블록 수).
+
+== 장단점 ==
+* ✅ [[Conflict miss]] 완전 제거
+* ❌ 모든 Tag를 다 비교 필요 → 비싸고 느림
+* → 작은 캐시 ([[TLB]] entry 등)에만 사용
+
+== 같이 보기 ==
+* [[캐시]]
+`
+},
+
+"Branch 주소 계산": {
+  title: "Branch 주소 계산",
+  category: ["ISA", "MIPS"],
+  body: `
+[[MIPS]] conditional branch (BEQ/BNE)의 target 주소 계산.
+
+<pre>
+Branch Target = PC + 4 + (sign_extend(imm16) << 2)
+</pre>
+
+* 기준: '''PC가 아니라 PC+4''' (이미 다음 명령어를 가리키도록 증가된 값)
+* imm16 단위: '''명령어 개수''' (byte 아님)
+* <<2: byte 단위 변환 (모든 명령어 4 byte)
+* 범위: '''±128 KB'''
+
+== 같이 보기 ==
+* [[MIPS]]
+* [[Jump 주소 계산]]
+`
+},
+
+"Jump 주소 계산": {
+  title: "Jump 주소 계산",
+  category: ["ISA", "MIPS"],
+  body: `
+[[MIPS]] J/JAL 명령어의 target 주소 계산.
+
+<pre>
+Jump Target = {(PC+4)[31:28], imm26, 2'b00}
+</pre>
+
+* 상위 4비트: '''PC+4에서 가져옴'''
+* imm26: word offset (4 byte 단위)
+* 하위 2 bit: 00 (byte align)
+* 범위: 같은 256 MB region 내
+
+256 MB 경계 넘으려면 [[jr]] $reg 사용.
+
+== 같이 보기 ==
+* [[MIPS]]
+* [[Branch 주소 계산]]
+`
+},
+
+"jr": {
+  title: "jr (Jump Register)",
+  category: ["ISA", "MIPS"],
+  body: `
+<code>jr $rs</code> — register $rs의 값으로 점프. R-type (funct=0x08).
+
+* 32비트 전체 주소 가능 (256 MB region 제약 없음)
+* 함수 return에 사용 (<code>jr $ra</code>)
+* [[Jump 주소 계산|j/jal]]의 256 MB region 한계 극복
+
+== 같이 보기 ==
+* [[MIPS]]
+* [[함수 호출 규약]]
+`
+},
+
+"jal": {
+  title: "jal (Jump and Link)",
+  category: ["ISA", "MIPS"],
+  body: `
+<code>jal target</code> — target으로 점프하면서 '''$ra ($31)에 PC+4 저장'''. 함수 호출의 핵심.
+
+* 저장되는 건 PC가 아니라 PC+4 (return 시 caller의 다음 명령어부터)
+* JAL은 register write만 — stack push 자동 X
+* return은 <code>jr $ra</code>
+
+== 같이 보기 ==
+* [[MIPS]]
+* [[함수 호출 규약]]
+* [[jr]]
+`
+},
+
+"Leaf 함수": {
+  title: "Leaf 함수",
+  category: ["MIPS"],
+  body: `
+다른 함수를 호출하지 않는 함수. ([[jal]]을 한 번도 안 부름)
+
+== 특징 ==
+* $ra 저장 불필요 (덮어쓸 일 없음)
+* prologue/epilogue 단순
+* 컴파일러가 적극적으로 최적화
+
+== Non-leaf와 비교 ==
+* '''Leaf''': $ra 저장 X
+* '''Non-leaf''': $ra 반드시 저장 (안 그러면 첫 jal에 $ra 덮어써져 return 불가)
+
+재귀함수는 자기를 jal로 호출하므로 non-leaf.
+
+== 같이 보기 ==
+* [[함수 호출 규약]]
+* [[Stack Frame]]
+`
+},
+
+"Stack Frame": {
+  title: "Stack Frame",
+  category: ["MIPS"],
+  body: `
+함수 호출 시 스택에 할당되는 메모리 블록. local variable, saved register, return address 등을 담는다.
+
+== MIPS Stack ==
+* 메모리 주소 '''감소 방향'''으로 grow
+* <code>addi $sp, $sp, -K</code> — K bytes 할당
+* Epilogue에서 <code>addi $sp, $sp, K</code> — 해제
+
+== 구성 ==
+* Argument (5+번째 이상)
+* Saved $ra (non-leaf인 경우)
+* Saved $s0~$s7 (사용한 것)
+* Local variables
+
+== 같이 보기 ==
+* [[함수 호출 규약]]
+* [[MIPS]]
+`
+},
+
+"명령어 스케줄링": {
+  title: "명령어 스케줄링",
+  category: ["파이프라인"],
+  body: `
+컴파일러가 명령어 순서를 재배치해 [[파이프라인]] [[데이터 해저드|hazard]]를 줄이는 기법.
+
+== 예 ==
+LW와 그 결과를 쓰는 명령어 사이에 다른 독립 명령어를 끼워 넣어 [[Load-Use 해저드]] stall을 회피.
+
+== Static vs Dynamic ==
+* '''Static''' (컴파일러): VLIW, in-order CPU에 중요
+* '''Dynamic''' (HW): [[비순차 실행|OoO]] 슈퍼스칼라가 런타임에 수행
+
+== 같이 보기 ==
+* [[Load-Use 해저드]]
+* [[VLIW]]
+* [[비순차 실행]]
+`
+},
+
+"Homonym": {
+  title: "Homonym (VIVT 캐시)",
+  category: ["메모리 시스템"],
+  body: `
+'''Homonym''' (동음이의어) 문제: [[가상 메모리]]에서 '''같은 가상 주소가 다른 프로세스에서 다른 물리 주소로 매핑'''되는 상황.
+
+VIVT 캐시에서는 프로세스 전환 시 같은 VA가 캐시 히트했는데 사실은 다른 데이터일 수 있음 → 오류.
+
+== 해결 ==
+PID/ASID를 캐시 entry tag에 추가하여 구분.
+
+== 같이 보기 ==
+* [[가상 메모리]]
+* [[Synonym]]
+`
+},
+
+"Synonym": {
+  title: "Synonym (VIVT 캐시)",
+  category: ["메모리 시스템"],
+  body: `
+'''Synonym''' (동의어) 문제: [[가상 메모리]]에서 '''다른 가상 주소가 같은 물리 주소로 매핑'''되는 상황 (shared memory 등).
+
+VIVT 캐시에서는 같은 데이터가 캐시에 두 번 들어갈 수 있어 일관성 깨짐.
+
+== 해결 ==
+[[Homonym]]보다 어려움. Alias 검사 등 복잡한 메커니즘 필요. 그래서 보통 [[VIPT]]나 [[PIPT]] 사용.
+
+== 같이 보기 ==
+* [[가상 메모리]]
+* [[Homonym]]
+`
+},
+
+"PIPT": {
+  title: "PIPT (Physical Index, Physical Tag)",
+  category: ["메모리 시스템"],
+  body: `
+[[캐시]] indexing 방식 중 하나. Index와 Tag 모두 '''Physical Address''' 사용.
+
+== 동작 ==
+1. [[TLB]] 조회로 VA → PA 변환
+2. 그 후 PA로 cache 접근
+
+→ '''느림''' (TLB 후 cache, sequential)
+→ '''안전''' ([[Homonym]]/[[Synonym]] 문제 없음)
+
+== 같이 보기 ==
+* [[가상 메모리]]
+* [[VIVT]]
+* [[VIPT]]
+`
+},
+
+"VIVT": {
+  title: "VIVT (Virtual Index, Virtual Tag)",
+  category: ["메모리 시스템"],
+  body: `
+[[캐시]] indexing 방식 중 하나. Index와 Tag 모두 '''Virtual Address''' 사용.
+
+== 동작 ==
+TLB 거치지 않고 바로 cache 접근 → '''매우 빠름'''
+
+== 단점 ==
+* [[Homonym]] 문제 (PID로 해결)
+* [[Synonym]] 문제 (해결 어려움)
+
+→ 현대 CPU에서는 거의 안 씀.
+
+== 같이 보기 ==
+* [[PIPT]]
+* [[VIPT]]
+* [[Homonym]]
+* [[Synonym]]
+`
+},
+
+"VIPT": {
+  title: "VIPT (Virtual Index, Physical Tag)",
+  category: ["메모리 시스템"],
+  body: `
+[[캐시]] indexing 방식 중 하나. Index는 Virtual, Tag는 Physical. 현대 L1 캐시의 표준.
+
+== 동작 ==
+TLB와 cache L1 indexing을 '''병렬'''로 진행 → '''latency hiding'''.
+
+* TLB가 PA를 계산하는 동안 cache는 VA로 indexing 시작
+* 둘 다 끝나면 Tag 비교 (Physical Tag)
+
+== 제약 ==
+<pre>
+Cache 크기 ≤ Associativity × Page 크기
+</pre>
+
+예: 4KB page, 4-way → cache 최대 16KB. 이걸 넘으려면 [[Page coloring]] 같은 OS 기법 필요.
+
+== 같이 보기 ==
+* [[PIPT]]
+* [[VIVT]]
+* [[가상 메모리]]
+`
+},
+
+"PCIe": {
+  title: "PCIe",
+  category: ["IO"],
+  body: `
+'''PCIe'''(Peripheral Component Interconnect Express)는 고속 IO 버스 표준. [[GPU]], NVMe SSD, 네트워크 카드 등 고속 device가 사용.
+
+* 차선(lane) 단위 확장 (x1, x4, x8, x16)
+* 최신 PCIe 5.0 x16은 ~64 GB/s
+
+== 같이 보기 ==
+* [[ch13 IO]]
+* [[DMA]]
+`
+}
+
+};
+// ============================================================
+
+// 분류별 그룹화용 메타
+const NAV_ORDER = [
+  { group: "📌 시작하기", items: ["main", "FAQ", "자주 틀리는 함정 모음"] },
+  { group: "📐 RECAP", items: ["성능 지표"] },
+  { group: "🔧 ISA / MIPS", items: ["MIPS", "명령어 포맷", "함수 호출 규약"] },
+  { group: "🚂 파이프라인", items: ["파이프라인 예외", "Load-Use 해저드"] },
+  { group: "⚡ 고급 마이크로아키텍처", items: ["비순차 실행", "슈퍼스칼라"] },
+  { group: "🧵 병렬성", items: ["멀티스레딩", "VLIW", "ILP와 TLP", "CMP"] },
+  { group: "💾 메모리 시스템", items: ["캐시", "MSI 프로토콜", "가상 메모리", "TLB"] },
+  { group: "🔌 IO (ch13)", items: ["ch13 IO", "CPU-IO Interaction", "PIO", "MMIO", "mmap", "DMA", "IOMMU", "Doorbell", "AMBA"] },
+];
+
+// ============================================================
+// 렌더링
+// ============================================================
+
+function renderNav(active) {
+  const nav = document.getElementById("navList");
+  nav.innerHTML = "";
+  NAV_ORDER.forEach(group => {
+    const groupHeader = document.createElement("li");
+    groupHeader.innerHTML = `<div style="font-weight:700; color:#34466b; padding:6px 4px 2px; font-size:12px;">${group.group}</div>`;
+    nav.appendChild(groupHeader);
+    group.items.forEach(key => {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = "#" + encodeURIComponent(key);
+      a.textContent = ARTICLES[key] ? ARTICLES[key].title : key;
+      if (key === active) a.classList.add("active");
+      li.appendChild(a);
+      nav.appendChild(li);
+    });
+  });
+}
+
+function renderArticle(key) {
+  const art = ARTICLES[key] || ARTICLES["main"];
+  const area = document.getElementById("articleArea");
+
+  let html = '';
+  if (key !== "main") {
+    html += `<div class="breadcrumb"><a href="#main">컴구위키</a> &gt; ${art.title}</div>`;
+  }
+  html += `<h1>${art.title}</h1>`;
+  html += `<div class="meta">분류: ${art.category.map(c => `<span class="cat-tag">${c}</span>`).join("")}</div>`;
+  html += renderWikiText(art.body);
+  html += `<div class="categories">분류: ${art.category.map(c => `<span class="cat-tag">${c}</span>`).join("")}</div>`;
+
+  area.innerHTML = html;
+
+  renderNav(key);
+  renderTOC();
+  window.scrollTo(0, 0);
+}
+
+// 마크다운 비슷한 문법 → HTML 변환
+function renderWikiText(text) {
+  // 줄 단위 처리
+  const lines = text.split("\n");
+  let html = "";
+  let inTable = false;
+  let tableRows = [];
+  let inPre = false;
+  let preContent = "";
+  let preClass = "";
+  let inList = false;
+  let listType = "";
+  let inFootnotes = false;
+
+  function flushTable() {
+    if (tableRows.length === 0) return;
+    let t = '<table>';
+    tableRows.forEach((row, idx) => {
+      const isHeader = row.cells[0].header;
+      t += '<tr>';
+      row.cells.forEach(c => {
+        const tag = c.header ? 'th' : 'td';
+        t += `<${tag}>${inlineFormat(c.text.trim())}</${tag}>`;
+      });
+      t += '</tr>';
+    });
+    t += '</table>';
+    html += t;
+    tableRows = [];
+    inTable = false;
+  }
+  function closeList() {
+    if (inList) {
+      html += listType === "ul" ? "</ul>" : "</ol>";
+      inList = false;
+    }
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+
+    // 코드블록
+    if (line.startsWith("<pre")) {
+      closeList(); flushTable();
+      inPre = true;
+      preClass = line.includes('class="ascii"') ? 'ascii' : '';
+      preContent = "";
+      continue;
+    }
+    if (inPre) {
+      if (line.startsWith("</pre>")) {
+        html += `<pre class="${preClass}">${preContent.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</pre>`;
+        inPre = false;
+      } else {
+        preContent += line + "\n";
+      }
+      continue;
+    }
+
+    // 박스류
+    const boxMatch = line.match(/^\{(info|warn|tip|joke)\}(.*)\{\/\1\}$/);
+    if (boxMatch) {
+      closeList(); flushTable();
+      html += `<div class="${boxMatch[1]}">${inlineFormat(boxMatch[2])}</div>`;
+      continue;
+    }
+
+    // 다중줄 박스 시작
+    const boxStart = line.match(/^\{(info|warn|tip|joke)\}(.*)$/);
+    if (boxStart && !line.includes("{/")) {
+      closeList(); flushTable();
+      let cls = boxStart[1];
+      let content = boxStart[2];
+      while (++i < lines.length) {
+        const next = lines[i];
+        if (next.match(new RegExp(`\\{/${cls}\\}$`))) {
+          content += "\n" + next.replace(new RegExp(`\\{/${cls}\\}$`), '');
+          break;
+        }
+        content += "\n" + next;
+      }
+      html += `<div class="${cls}">${inlineFormat(content).replace(/\n/g, '<br>')}</div>`;
+      continue;
+    }
+
+    // footnotes
+    if (line.trim() === "{footnotes}") { inFootnotes = true; html += '<div class="footnote">'; continue; }
+    if (line.trim() === "{/footnotes}") { inFootnotes = false; html += '</div>'; continue; }
+
+    // 표 (위키스타일 {| ... |})
+    if (line.startsWith("{|")) { closeList(); inTable = true; tableRows = []; continue; }
+    if (line.startsWith("|}")) { flushTable(); continue; }
+    if (inTable) {
+      if (line.startsWith("|-")) continue;
+      if (line.startsWith("!")) {
+        const cells = line.substring(1).split("||").map(c => ({text: c, header: true}));
+        tableRows.push({cells});
+      } else if (line.startsWith("|")) {
+        const cells = line.substring(1).split("||").map(c => ({text: c, header: false}));
+        tableRows.push({cells});
+      }
+      continue;
+    }
+
+    // 헤딩
+    if (line.startsWith("== ") && line.endsWith(" ==")) {
+      closeList(); flushTable();
+      const text = line.slice(3, -3);
+      const id = "h_" + text.replace(/\s/g, "_");
+      html += `<h2 id="${id}">${inlineFormat(text)}</h2>`;
+      continue;
+    }
+    if (line.startsWith("=== ") && line.endsWith(" ===")) {
+      closeList(); flushTable();
+      const text = line.slice(4, -4);
+      const id = "h_" + text.replace(/\s/g, "_");
+      html += `<h3 id="${id}">${inlineFormat(text)}</h3>`;
+      continue;
+    }
+    if (line.startsWith("==== ") && line.endsWith(" ====")) {
+      closeList(); flushTable();
+      const text = line.slice(5, -5);
+      html += `<h4>${inlineFormat(text)}</h4>`;
+      continue;
+    }
+
+    // 목록
+    if (line.startsWith("* ")) {
+      if (!inList || listType !== "ul") {
+        closeList();
+        html += "<ul>"; inList = true; listType = "ul";
+      }
+      html += `<li>${inlineFormat(line.substring(2))}</li>`;
+      continue;
+    }
+    if (line.startsWith("# ")) {
+      if (!inList || listType !== "ol") {
+        closeList();
+        html += "<ol>"; inList = true; listType = "ol";
+      }
+      html += `<li>${inlineFormat(line.substring(2))}</li>`;
+      continue;
+    }
+    closeList();
+
+    // 빈줄
+    if (line.trim() === "") continue;
+
+    // 이미지 한 줄짜리 line은 <p>로 감싸지 않음 (block-level figure)
+    if (line.trim().startsWith("[[img:") && line.trim().endsWith("]]")) {
+      html += inlineFormat(line);
+      continue;
+    }
+
+    // 일반 문단
+    html += `<p>${inlineFormat(line)}</p>`;
+  }
+  closeList(); flushTable();
+  return html;
+}
+
+function inlineFormat(text) {
+  // [[img:filename|caption|size]] — PDF 캡처 이미지
+  text = text.replace(/\[\[img:([^\|\]]+)(?:\|([^\|\]]*))?(?:\|(small|medium|large))?\]\]/g, (m, fname, caption, size) => {
+    const cls = size || 'medium';
+    const cap = caption ? `<figcaption>${caption}</figcaption>` : '';
+    return `<figure class="pdf-img ${cls}"><img src="images/${fname}" alt="${caption||fname}" loading="lazy">${cap}</figure>`;
+  });
+  // [[link|text]] or [[link]]
+  text = text.replace(/\[\[([^\|\]]+)\|([^\]]+)\]\]/g, (m, key, label) => {
+    const exists = !!ARTICLES[key];
+    const cls = exists ? "wiki" : "wiki wiki-stub";
+    return `<a href="#${encodeURIComponent(key)}" class="${cls}">${label}</a>`;
+  });
+  text = text.replace(/\[\[([^\]]+)\]\]/g, (m, key) => {
+    const exists = !!ARTICLES[key];
+    const cls = exists ? "wiki" : "wiki wiki-stub";
+    const label = ARTICLES[key] ? ARTICLES[key].title : key;
+    return `<a href="#${encodeURIComponent(key)}" class="${cls}">${label}</a>`;
+  });
+  // bold ''' '''
+  text = text.replace(/'''([^']+)'''/g, '<strong>$1</strong>');
+  // italic '' ''
+  text = text.replace(/''([^']+)''/g, '<em>$1</em>');
+  // code `` 는 그대로
+  return text;
+}
+
+function renderTOC() {
+  const tocList = document.getElementById("tocList");
+  const headings = document.querySelectorAll("main h2, main h3");
+  tocList.innerHTML = "";
+  headings.forEach(h => {
+    const li = document.createElement("li");
+    li.className = "toc-item " + (h.tagName === "H2" ? "l2" : "l3");
+    const a = document.createElement("a");
+    a.href = "#" + h.id;
+    a.textContent = h.textContent;
+    a.style.color = "#1d65b3";
+    a.style.textDecoration = "none";
+    a.style.fontSize = "12px";
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+}
+
+// 검색
+document.getElementById("searchBox").addEventListener("input", e => {
+  const q = e.target.value.trim().toLowerCase();
+  const nav = document.getElementById("navList");
+  if (q === "") {
+    renderNav(currentArticle());
+    return;
+  }
+  nav.innerHTML = "";
+  Object.keys(ARTICLES).forEach(key => {
+    const art = ARTICLES[key];
+    const haystack = (key + " " + art.title + " " + art.body).toLowerCase();
+    if (haystack.includes(q)) {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = "#" + encodeURIComponent(key);
+      a.textContent = art.title;
+      li.appendChild(a);
+      nav.appendChild(li);
+    }
+  });
+});
+
+function currentArticle() {
+  const hash = decodeURIComponent(location.hash.substring(1));
+  return ARTICLES[hash] ? hash : "main";
+}
+
+window.addEventListener("hashchange", () => renderArticle(currentArticle()));
+renderArticle(currentArticle());
+
+</script>
+</body>
+</html>
