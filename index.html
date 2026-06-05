@@ -407,6 +407,8 @@ const ARTICLES = {
 # [[가상 메모리]] — Paging, [[TLB]], [[PIPT]]/[[VIVT]]/[[VIPT]]
 # [[ch13 IO]] — PIO/[[MMIO]], [[DMA]]/[[IOMMU]], [[Doorbell]], [[AMBA]] ⭐ NEW
 
+{warn}'''⏰ 시험 24시간 전''' = [[자주 틀리는 함정 모음]] 만 봐라. 챕터별 + 계산 함정이 정리되어 있다.{/warn}
+
 == 분류별 문서 ==
 
 === ISA 계열 ===
@@ -425,12 +427,12 @@ const ARTICLES = {
 * [[ROB]] / [[ISQ]] / [[LSQ]]
 
 === 메모리 시스템 ===
-* [[캐시]]
-* [[가상 메모리]]
-* [[TLB]] / [[MMU]]
+* [[캐시]] / [[AMAT]] / [[MSHR]] / [[Write Buffer]]
+* [[가상 메모리]] / [[HPT 계산]]
+* [[TLB]] / [[MMU]] / [[ASID]]
 * [[MSI 프로토콜]] / [[MESI]]
 * [[Page Fault]] / [[Demand paging]]
-* [[PIPT]] / [[VIVT]] / [[VIPT]]
+* [[PIPT]] / [[VIVT]] / [[VIPT]] / [[Synonym]] / [[Homonym]]
 
 === 병렬성 ===
 * [[멀티스레딩]] / [[하이퍼스레딩]]
@@ -440,10 +442,16 @@ const ARTICLES = {
 
 === IO (ch13) ⭐ NEW ===
 * [[ch13 IO]]
-* [[MMIO]] / [[PIO]] / [[mmap]]
-* [[DMA]] / [[IOMMU]]
+* [[MMIO]] / [[PIO]] / [[mmap]] / [[Page Cache]] / [[FIFO Side Effect]]
+* [[DMA]] / [[IOMMU]] / [[DMA Pinning]]
 * [[Doorbell]] / [[IRQ]]
-* [[AMBA]] / [[SoC]]
+* [[AMBA]] / [[AHB Transfer]] / [[SoC]]
+
+=== 🚨 오답 함정 정리 (시험 직전 review용) ===
+* [[자주 틀리는 함정 모음]] — 챕터별 + 계산 함정 (★★ 단골 강조)
+* [[HPT 계산]] — x86-64 4-level walk = 400ns
+* [[AMAT]] — 1 + 0.05×100 = 6 cycles 예제
+* [[Branch 주소 계산]] / [[Jump 주소 계산]]
 
 == 시험 정보 ==
 
@@ -1917,70 +1925,295 @@ TLB miss → PTW가 PT 검색
   title: "자주 틀리는 함정 모음",
   category: ["FAQ"],
   body: `
-이 문서는 학생이 [[NotebookLM]] 등 quiz를 풀면서 누적적으로 틀린 함정들을 모은 cheat-sheet이다. 시험 전날 review용.
+이 문서는 학생이 [[NotebookLM]] / 1차 모의시험 / quiz를 풀면서 누적적으로 틀린 함정들을 모은 cheat-sheet이다. 시험 전날 review용. **챕터별 + 계산 함정** 으로 분리.
+
+{tip}이 문서는 살아 있는 문서다. 새 오답 나오면 해당 섹션에 추가. 같은 함정 두 번 틀리면 별표(★) 추가.{/tip}
+
+== 🔥 단골 1순위 함정 (★★ 이상) ==
+
+학생이 두 번 이상 틀리거나, 위키의 다른 곳에서 따로 강조한 것들. 시험 1시간 전 마지막 review용.
+
+* '''LW 목적지 = rt''' (rd 아님). I-type엔 rd 필드 자체가 없다.
+* '''Branch Target''' = '''PC + 4''' + sext(imm)<<2. PC 아님. 음수 imm일 때도 +4.
+* '''Jump Target''' = {(PC+4)[31:28], imm26, 2'b00}. 상위 4비트는 PC+4에서.
+* '''CPI 높을수록 느림''' — 직관과 반대. 공식 CPU Time = IC × CPI / f부터 적기.
+* '''SMT = Space Sharing''' (Time-Sharing은 FGMT/CGMT). 이름이 비슷해 헷갈림.
+* '''Fully-Associative는 Conflict miss만 제거''' — Capacity miss는 못 막음.
+* '''MMIO도 default로 캐싱된다''' — Cache는 PA만 보고 device인지 구분 못 함. UC PTE 명시 필요.
+* '''IOMMU 방향 = IOVA → PA''' (PA→VA로 보면 함정).
+* '''Synonym/Homonym 정확한 정의''':
+  - Synonym = '''다른 VA → 같은 PA''' (공유 라이브러리). VIPT 제약으로 해결.
+  - Homonym = '''같은 VA → 다른 PA''' (다른 프로세스). ASID로 해결.
+* '''VIPT 제약''': Cache 크기 ≤ Associativity × Page 크기. 4KB page + 4-way → 최대 16KB.
+
+----
 
 == MIPS ==
 
-* LW 목적지 = '''rt''' (rd 아님, [[MIPS|I-type]]은 rd 필드 자체가 없다)
-* add 명령어 destination = '''첫 번째 operand''' (마지막 아님)
-* hex digit 경계 ≠ 명령어 필드 경계 → '''반드시 2진수로 펼친 후''' 6/5/5/5/5/6 비트로 자르기
-* SLL은 R-type (funct field 있음)
-* 'u' 접미사 (addu, addiu) = unsigned 아니라 '''overflow 예외 안 던짐'''
-* Big-Endian: 0x12345678 @ 0x100 → 0x100에 '''0x12 (MSB)'''
+* LW 목적지 = '''rt''' (rd 아님, [[MIPS|I-type]]은 rd 필드 자체가 없다) ★★
+* R-type만 rd 있음. rt는 R-type / I-type 둘 다 있음.
+* add 명령어 destination = '''첫 번째 operand''' (마지막 아님). 예: <code>add $s0, $a1, $t7</code> → dest=$s0.
+* hex digit 경계 ≠ 명령어 필드 경계 → '''반드시 2진수로 펼친 후''' 6/5/5/5/5/6 비트로 자르기. 예: "0x00432024"를 hex 그대로 보면 4/3/2 라고 못 읽음.
+* SLL은 '''R-type''' (funct field 있음). funct=0x00이라도 R-type. rs=0(무시), rt=source, rd=dest, shamt=shift양.
+* 'u' 접미사 (addu, addiu) = unsigned 아니라 '''overflow 예외 안 던짐'''. 산술 결과 비트열은 add와 100% 동일.
+* "unsigned overflow 검사" 문구 = '''함정 단어'''. ADD는 SIGNED overflow만 검사.
+* Big-Endian: 0x12345678 @ 0x100 → 0x100에 '''0x12 (MSB)'''.
+* Sign-ext 0x8F → 0xFF8F (MSB=1 복사) / Zero-ext 0x8F → 0x008F (의미 변경).
+* '''ori vs andi vs addi 결과 다 다름''': ori는 zero-ext OR, andi는 zero-ext AND, '''addi는 sign-ext ADD'''.
+* OR/AND는 '''bitwise 연산''' (boolean OR 아님). <code>$0 OR 0x0000FFFF</code> = 0x0000FFFF.
+* '''R[$6] - 4 ≠ R[$6-4]''': 전자는 reg 값에서 4 뺀 effective address, 후자는 reg 번호 (6-4)=R[$2].
 
 == Branch / Jump ==
 
-* Branch target = '''PC + 4''' + (sext(imm)<<2) — PC 아님
-* 음수 offset일 때도 +4 잊지 말 것
-* Jump target은 '''(PC+4)[31:28]''' 사용 — imm26만 보는 거 아님
-* BEQ 범위 = '''±128 KB''' (64KB 아님)
+* Branch target = '''PC + 4''' + (sext(imm)<<2) — PC 아님 ★★
+* '''음수 offset일 때도 +4 잊지 말 것''': PC=0x100, imm=-2 → PC+4=0x104, +(-8) = '''0x0FC''' (0x0F8 아님).
+* Jump target은 '''(PC+4)[31:28]''' 사용 — imm26만 보는 거 아님 ★★
+* '''BEQ 범위 = ±128 KB''' (64KB 아님). imm16 signed × 4 = ±2^15 × 4 = ±2^17.
+* '''J/JAL 범위 = 같은 256MB region''' (imm26 × 4 = 2^28). 경계 넘으려면 JR.
+* imm field 단위 = '''명령어 개수''' (byte 아님). byte offset = imm << 2 (HW가 ALU에서 계산).
+* +N → 비트 뒤집기 → +1 = 2's complement of -N. 예: +9 = 0x0009 → 0xFFF7 = -9.
+* 2의 거듭제곱: 2^10 = 1K, 2^15 = 32K, 2^16 = 64K, 2^20 = 1M, 2^28 = 256M, 2^30 = 1G.
 
 == Cache ==
 
 * Direct-mapped 매핑 = '''mod''' (곱셈 아님)
 * Index = 칸 찾기, Tag = 검증, Block offset = byte 선택 — 셋 헷갈리지 말 것
-* Fully-assoc은 '''Conflict miss만''' 제거 (Capacity는 못 막음)
+* '''3차원 독립 spec''': Block size B × Associativity A × Set 수 M. '''block ≠ set, way ≠ words/block''' (혼동 잦음).
+* Words/block = B / word_size. word size는 '''ISA가 못박음''' (MIPS=4B), 캐시 설계자 못 바꿈.
+* '''주소 분해에 way 수(A) 안 들어감''' — way는 비교기 개수에만 영향.
+* '''"any line" / "CAM" 키워드''' 보이면 = fully-assoc 전용 ★. Direct-mapped는 index decode + 비교기 1개로 충분.
+* '''N-way = set 1개 안에 way(line) N개''' (set 수가 N 아님). set 수는 M = 캐시크기 / (N×B).
+* Fully-assoc은 '''Conflict miss만''' 제거 (Capacity는 못 막음) ★★
+* '''3C miss 정확한 정의''':
+  - Compulsory = 첫 접근 (= cold = first-ref). 무한 캐시도 못 막음.
+  - Capacity = 용량 부족. Fully-assoc 캐시도 capacity miss는 남음.
+  - Conflict = "fully-assoc였으면 안 났을 miss". '''Fully-assoc만이 conflict 0'''.
 * Dirty bit = "수정됨, eviction 시 write-back 필요" (Valid bit과 구분)
-* MSHR = '''miss 전용''', hit과 무관
+* MSHR = '''miss 전용''', hit과 무관. Non-blocking cache에서만 의미 있음.
+* '''MSHR vs Write Buffer 구분''':
+  - Write Buffer = store 큐 (WT용 주된 보조구조). Coalescing은 store 데이터 합치기.
+  - MSHR = load miss 추적 (non-blocking 필수). Merging은 요청자 목록 합치기.
 * Stride prefetcher는 history buffer 필요해서 sequential보다 '''HW 면적 더 큼'''
+* '''Block Size U-curve''': 작으면 spatial 못 살림, 크면 line 수↓로 conflict↑. Sweet spot 32~128B.
+* '''FIFO replacement = oldest out''' (LIFO/MRU evict 아님). hit 때 순서 갱신 X (LRU는 갱신).
+* '''byo (byte offset)는 cache 일이 아님''' — CPU load unit이 sub-word 추출에 사용. tag 비교/line 선택/MUX와 무관.
+* Write policy 짝: '''WB+WA''' 또는 '''WT+NWA'''가 흔함.
+* LRU는 way 수 많아지면 못 함 → '''Pseudo-LRU''' (트리 비트).
+
+== MSI / Cache Coherence ==
+
+* '''S 상태 = multi-cache 동시 존재 + read-only''' ★ (D 선지 단골)
+* S에서 PrWr → '''BusRdX 발사 → 다른 cache I → 본인 M''' 으로 전이 후 write
+* '''신호 종류 구분''':
+  - Processor→Cache: PrRd, PrWr
+  - Cache→Bus (broadcast): BusRd (read 의도), BusRdX (write 의도, 다 invalidate), BusWB (M block evict)
+* '''Snoop 응답 4 시나리오''':
+  - I→S (처음 읽기)
+  - S→S (다른 코어 읽기, 무동작)
+  - S→M + 다른 cache I (write)
+  - M→S + WB (다른 코어 읽기)
+* MESI는 E 상태 추가 — "혼자 가졌는데 안 고침" 표현. BusRdX 없이 silent M 전이 가능.
 
 == Pipeline / Exception ==
 
 * Register write는 항상 '''WB stage''' (EX 아님)
 * Coprocessor 0 = system control (exception), Coprocessor 1 = FPU
 * Vectored interrupt = HW 직접 매핑 (label 검색 ❌ — label은 어셈블 단계에서 사라짐)
-* "improper access to memory" — IF(instruction memory) vs MEM(data memory) 구분
+* "improper access to memory" — '''IF(instruction memory) vs MEM(data memory) 구분'''. 같은 단어, 다른 stage.
+* '''Precise exception''': older=완료 / faulting=직전 정지 / younger=flush. ROB가 이걸 가능하게 함.
+* "control transfer" = handler 진입/복귀의 점프 그 자체. "transparent" = 유저가 인터럽트 발생을 알 수 없게.
+* '''Hazard 3종''':
+  - Data hazard (RAW): 앞 명령어 WB 전인데 뒤 명령어가 같은 reg를 read.
+  - Control hazard: Branch taken 시 IF/ID 명령어 flush.
+  - Structural hazard: 다른 stage가 같은 물리 자원에 동시 접근.
+* '''Load-Use''': LW의 data는 MEM 끝, ADD의 EX는 같은 cycle → forwarding 불가 → '''1 cycle stall + 그 후 forwarding'''.
 
 == Performance ==
 
-* CPI가 '''높을수록 느림''' (직관과 반대)
-* 평균 종류: GM = 정규화 비율, HM = rate (IPC/MIPS), AM = 절대값
+* CPI가 '''높을수록 느림''' ★★ (직관과 반대). 공식 CPU Time = IC × CPI / f부터 적기.
+* CPI = Σ(ratio_i × CPI_i) (가중평균).
+* 평균 종류: '''AM''' = 절대값 평균, '''GM''' = 정규화 비율, '''HM''' = rate (IPC/MIPS).
 * '''P ∝ V² × f''' (frequency는 1차, 제곱은 voltage)
 * IC = ISA+컴파일러, IPC = 마이크로아키텍처 (자주 헷갈림)
+* Wall clock time = (1/f) × (1/IPC) × IC.
+* Pipeline Perf = 1/(T/n + R), 최대 speedup = (T+R)/R ≈ T/R. Clock period = 가장 느린 stage.
+* Multi-cycle clock period = '''가장 느린 micro-state 1개''' (평균 CPI 기준 X).
 
 == OoO / Superscalar ==
 
-* RAW=진짜, WAR/WAW=가짜(renaming으로 해결), RAR=의존성 아님
-* Speculation 결과는 '''즉시 commit X''' (ROB에 보관 후 검증)
+* '''RAW=진짜, WAR/WAW=가짜(renaming으로 해결), RAR=의존성 아님'''
+* Speculation 결과는 '''즉시 commit X''' (ROB에 보관 후 검증, 검증 후 in-order commit)
 * Scoreboarding은 데이터 해저드 관리, [[TLB]]/page table과 '''무관'''
+* ROB = in-order commit. ISQ = source/자원 ready 시 issue. 둘이 협력.
+* ILP 한계 → width 늘려도 의존성/분기예측 실패로 수확 체감 → TLP/CMP로 진화.
+* OoO 제어 로직 ≈ 칩 면적 30% 소모 → CMP가 area-efficient.
 
 == Multithreading / VLIW ==
 
 * TLP는 register file 면적 '''증가''' (감소 아님)
 * VLIW NOP은 '''컴파일 타임에 정적''' 삽입 (런타임 X)
-* SMT = Space Sharing (각 스레드 dedicated core 아님 — 그건 CMP)
-* 공유 자원: Code, Global Data / 개별: Register File, Stack, PC
+* '''SMT = Space Sharing''' (각 스레드 dedicated core 아님 — 그건 CMP) ★★
+* Time-Sharing = FGMT/CGMT. SMT는 같은 cycle에 여러 스레드 명령어 발행.
+* '''CGMT''': long-latency 이벤트(L2 miss, I/O)에서만 switch. **Minor single-thread overhead** (FGMT는 significantly sacrifice).
+* '''SMT 추가 비용 작은 이유''': OoO ISQ는 thread 무관하게 ready 명령어 issue → PC/rename table만 thread별 추가하면 됨.
+* '''Underutilization 2 종류''': ① cycle 내 일부 slot 빔 (ILP 부족) ② cycle 통째 빔 (long-latency stall). '''SMT는 둘 다 해결''' (FGMT는 ②만).
+* '''PR 공식''': # physical regs ≥ # threads × # architectural regs. MIPS 2-thread SMT → ≥ 64 PR.
+* '''SMT는 무조건 캐시 공유''' (L1부터). CMP는 L1 private + L2 shared.
+* '''N-core ≠ N-way SMT ≠ N-wide superscalar''' — 세 가지 다른 N. 8-core 2-way SMT = 16 logical CPU.
+* 공유 자원: '''Code, Global Data''' / 개별: '''Register File, Stack, PC'''.
+* Scratchpad = SW 관리 / Cache = HW 관리.
 
 == Virtual Memory ==
 
 * TLB miss ≠ Page fault (TLB miss 후 PTE 없을 때만 page fault)
 * HPT는 sparse address 효율적, IPT는 hash 기반
-* VIPT는 cache 크기 ≤ associativity × page 크기 제약
-* VIVT의 Homonym = 같은 VA 다른 PA (PID로 해결), Synonym = 다른 VA 같은 PA (해결 어려움)
+* '''VIPT 제약''': Cache 크기 ≤ Associativity × Page 크기 ★★
+  - 4KB page → Index 최대 12bit (HPT의 9bit는 VPN 쪼개기, 함정!)
+  - 용량 ↑ 방법: Set 못 늘림 → '''Associativity 증가'''
+* '''Synonym/Homonym''' (가장 큰 함정, 반대 개념) ★★
+  - Synonym = 다른 VA → 같은 PA (공유 라이브러리) → 캐시 중복 → VIPT 제약으로 해결
+  - Homonym = 같은 VA → 다른 PA (여러 프로세스) → '''ASID'''로 해결
+* '''ASID는 homonym만 해결''' — synonym은 해결 못 함.
+* '''Page Cache (OS, 실데이터)''' vs '''Page Walk Cache (HW MMU, 중간 PTE 디스크립터)''' — 이름 함정.
+* '''비트 종류 구분''':
+  - Cache Dirty bit = "수정됨, eviction 시 write-back"
+  - PTE Present bit = P=1 메모리 / P=0 스왑 (page fault 발생)
+  - PTE Dirty bit = 페이지 수정 (swap-out 시 디스크 기록)
+* '''Fragmentation''': Internal(블록 내부 낭비) vs External(연속 공간 부족). "Dynamic frag"는 PPT 용어 X.
+* '''Working Set ≠ 전체 VAS''' — 현재 활발히 쓰는 page 집합. WS > 물리메모리 = '''Thrashing'''.
+* Thrashing(성능 저하) vs SegFault(권한 위반) 구분.
+* '''Capacity Gap''' = 실제 물리 메모리 ↔ 멀티태스킹 이상적 메모리 (VM 도입 동기).
+* '''TLB vs I-Cache''': TLB는 변환 매핑 / I-Cache는 명령어 코드.
+* Fully-Assoc TLB 단점: CAM 필요 → power/area/latency 비쌈 → 현대는 4~12 way SA.
+* '''PO 크기 = log2(페이지 크기)''' — HPT 단계 수와 무관.
+* Segment Attribute field = 공유 + 다른 권한 부여 (Segment ID는 식별만).
+* '''Range checking 공식: SO < Bound''' (PA = Base + SO와 헷갈리지 말 것).
+* HPT (VAS 크기 기준, 4단계 walk) vs IPT (물리메모리 크기, 해시 + chain).
+
+== 🔌 IO (ch13) — Day 16 추가분 ==
+
+* '''PIO ↔ MMIO 방향''' 완전히 거꾸로 외우기 쉬움 ★★
+  - PIO (IN/OUT): 별도 IO 주소 공간, x86 전용, '''privileged'''
+  - MMIO: PA 일부에 device 매핑, 일반 LD/ST, '''user mode 가능''' (page table 매핑 여부로 제어)
+* '''MMIO는 일반 LD/ST → user mode 가능''' (privileged 아님). 보안은 page table 매핑으로 처리. 예: GPU command queue user mapping.
+* '''Cache는 PA만 보고 캐싱''' → MMIO도 default로 캐싱됨 ★
+  - "ST 가 L1 도달 = device 즉시 봄" → 정반대 (write-back은 eviction까지 device 못 도달)
+  - 해결 3종: '''clflush''' / '''Non-temporal store''' (MOVNTI) / '''PTE Uncacheable''' (가장 깔끔)
+  - WT cache도 부족 — L2/L3 지연 + bus reordering. UC가 정공법.
+* '''FIFO MMIO side effect''': LDR=pop, STR=push. 한 번 더 LDR = 데이터 손실.
+  - 대응: volatile, UC PTE, clflush, non-temporal, speculative 차단
+  - 모든 MMIO가 side effect 있는 건 아님 (status reg, control reg는 없음)
+* '''Page Cache는 SW cache''' (kernel이 RAM 한 켠에 만든 file cache). HW X, CPU X, '''모든 프로세스 공유'''.
+  - "page"라는 이름이 ch11 cache의 block과 헷갈림. ch13 page cache 단위 = 4KB (VM page와 같음).
+  - Page Cache vs L1/L2/L3: SW vs HW / DRAM vs CPU chip / 4KB vs 64B / OS 정책 vs HW 정책.
+* '''mmap = page cache page를 user에게 직접 노출''' (zero-copy 인터페이스)
+  - mmap 첫 access page fault = page cache lookup (hit면 disk 안 감)
+  - read() vs mmap(): 전자는 page cache → user buf copy / 후자는 page cache page를 page table에 매핑
+  - 두 process가 같은 file mmap → 같은 page cache page 공유 (libc.so 1벌만 RAM에)
+  - "mmap은 page cache 우회한다" → ❌ 정반대
+* '''DMA L1 way 점유는 허구''' ★
+  - DMA는 L1 자체를 안 지남 (L1은 CPU core 옆 SRAM, SW용)
+  - 진짜 이슈 = '''Coherency''' (DMA 쓴 새 값을 CPU L1이 옛 값으로 들고 있으면 stale)
+  - 해결: HW-coherent DMA (snoop으로 자동 invalidate) 또는 SW-managed (clflush 수동)
+* '''IOMMU 방향 = IOVA → PA''' ★★ (PA→VA로 보면 함정. device가 PA를 어떻게 알겠나?)
+  - IOMMU = "device를 위한 MMU". MMU↔IOMMU, VA↔IOVA, TLB↔IOTLB, PT↔IOPT.
+  - 흐름: Device → IOVA → IOMMU (IOTLB hit/miss, miss면 IOPT walk) → PA → bus.
+* '''DMA region pinning 필수''' ★
+  - 이유: device는 OS가 swap한 걸 모름 + '''device는 page fault로 멈출 수 없음''' (burst transfer 진행 중 abort 불가)
+  - 사용처: CUDA <code>cudaMallocHost()</code>, DPDK, RDMA/InfiniBand, Linux <code>mlock()</code>, kernel <code>mm_mpin()</code>
+* '''Polling/Interrupt = driver 코드 결정''' (runtime syscall 아님) ★
+  - Latency-sensitive (keyboard, mouse) → polling / Infrequent + long-latency (disk, NIC, GPU DMA) → interrupt
+  - 한 system 안에서 device마다 다른 mode 공존 가능 (keyboard=polling, NIC=interrupt)
+  - Polling은 syscall 안 거치는 게 본질, Interrupt enable/disable는 privileged
+* '''AHB ↔ APB 이름''' 거꾸로 외우면 함정 ★
+  - A'''H'''B = '''H'''igh-perf (CPU↔RAM, DMA)
+  - A'''P'''B = '''P'''eripheral (UART/Timer/Keypad, 저속·저전력)
+  - 5종 사다리: CHI > ACE > AXI > AHB > APB
+* '''AHB HREADY LOW 시 master 신호 유지 의무''' (free하게 변경 X). Address phase 연장.
+* '''AHB burst 제어 3종''': H'''B'''URST=length / H'''S'''IZE=beat size / H'''T'''RANS=cycle status.
+* '''AHB multi-master는 Arbiter 필수''' — 없으면 electrical 충돌. "first-come-first-served" 함정.
+* INCR vs WRAP: INCR4 단순 증가, WRAP4 cache line 안에서 wrap-around (critical-word-first 로딩용).
+
+----
+
+== 🧮 계산 함정 (Worked Examples) ==
+
+=== Branch target 계산 ===
+
+* PC = 0x100, imm16 = -2:
+  - PC+4 = 0x104
+  - imm<<2 = -8
+  - Target = 0x104 + (-8) = '''0x0FC''' (0x0F8 아님)
+
+=== AMAT 계산 ===
+
+* hit=1, miss rate=5%, miss penalty=100 → AMAT = 1 + 0.05×100 = '''6 cycles'''
+* 다중 레벨: AMAT_L1 = HitTime_L1 + MR_L1 × (HitTime_L2 + MR_L2 × Penalty_L2)
+* '''ns ↔ cycle 환산''': 100ns DRAM @ 1GHz = 100 cycles. 180 cycles @ 3.6GHz = 50ns (p.15).
+
+=== Cache 주소 분해 ===
+
+* 캐시 16KB, 4-way SA, block 64B:
+  - 총 line = 16KB / 64B = 256
+  - Set 수 = 256 / 4 = 64
+  - byo = log2(64) = 6 bit
+  - Index = log2(64) = 6 bit
+  - Tag = 32 - 6 - 6 = '''20 bit'''
+  - '''way 수는 주소 분해에 안 들어감'''
+
+=== Hex → binary 분해 (R-type 디코딩) ===
+
+* "0x00432024" R-type:
+  - 0000 0000 0100 0011 0010 0000 0010 0100
+  - op[31:26]=000000 / rs[25:21]=00010 / rt[20:16]=00011 / rd[15:11]=00100 / shamt[10:6]=00000 / funct[5:0]=100100
+  - = AND $4, $2, $3
+* '''hex digit 경계로 자르면 절대 안 됨''' (4/3/2 못 읽음). 무조건 2진수 펼친 후 6/5/5/5/5/6.
+
+=== HPT walk cost ===
+
+* x86-64 4-level HPT: PML4 → PDPT → PD → PT → 실데이터 = '''5 메모리 access'''
+* DRAM 100ns × 4 walk = '''400ns''' (PWC와 TLB 미적용 시)
+* 그래서 TLB가 죽도록 중요 (보통 hit rate >99%)
+
+=== PR 공식 (SMT) ===
+
+* MIPS arch reg = 32
+* 2-thread SMT → ≥ 64 PR
+* 4-thread SMT → ≥ 128 PR
+* OoO renaming용 in-flight PR 추가 필요 → 실제는 더 많음
+
+=== VIPT 크기 한계 ===
+
+* 4KB page (PO = 12 bit)
+* 4-way SA → 최대 cache 크기 = 4 × 4KB = 16KB
+* 8-way → 32KB, 16-way → 64KB
+* '''Set 수 늘려서 키울 수 없음''' (index가 PO 안에 들어가야 함)
+
+=== Pipeline speedup ===
+
+* T = 800 ps (single-cycle), n = 5 stages, R = 50 ps (register delay)
+* Perf_pipe = 1/(800/5 + 50) = 1/(160+50) = 1/210 ps^-1
+* 최대 speedup ≈ T/R = 800/50 = '''16배''' (실제는 hazard로 더 작음)
+
+----
 
 == 같이 보기 ==
 * [[FAQ]]
 * [[성능 지표]]
+* [[캐시]]
+* [[MSI 프로토콜]]
+* [[가상 메모리]]
+* [[VIPT]]
+* [[Synonym]]
+* [[Homonym]]
+* [[ch13 IO]]
+* [[MMIO]]
+* [[IOMMU]]
+* [[DMA Pinning]]
+* [[Page Cache]]
+* [[MSHR]]
+* [[Write Buffer]]
+* [[AHB Transfer]]
 `
 },
 
@@ -2365,9 +2598,33 @@ DMA는 '''virtual address'''를 사용한다. 이유:
   body: `
 '''IOMMU'''(I/O Memory Management Unit)는 [[DMA]]를 지원하는 IO device를 위한 전용 [[MMU]]이다. IO 가상 주소(IOVA)를 물리 주소로 변환하고 접근 권한을 체크한다.
 
+{warn}'''방향 함정 ★★''': IOMMU 변환은 무조건 '''IOVA → PA'''. "PA → VA"로 적힌 선지는 함정. (Device가 PA를 어떻게 알고 보내겠나?){/warn}
+
+== 한 줄 정의 ==
+
+IOMMU = '''device를 위한 MMU'''. CPU MMU와 1:1 대응:
+
+{| class="table"
+! CPU 쪽 || IO 쪽
+|-
+| MMU || IOMMU
+|-
+| VA || IOVA
+|-
+| TLB || IOTLB
+|-
+| Page Table (PT) || IOPT
+|}
+
 == 왜 필요한가 ==
 
 [[DMA]]가 [[가상 메모리|virtual address]]를 쓰면 그 변환을 누군가 해야 한다. CPU MMU는 CPU 자신의 요청만 처리 — 그래서 device용 별도 변환기가 필요. 그게 IOMMU.
+
+== 동작 흐름 ==
+
+<pre>
+Device → IOVA → IOMMU (IOTLB hit/miss, miss면 IOPT walk) → PA → Memory bus
+</pre>
 
 == 구조 ==
 
@@ -2377,6 +2634,11 @@ DMA는 '''virtual address'''를 사용한다. 이유:
 * **IOMMU + IOTLB**: 전체 device들 공통 캐시
 * **Memory**: 실제 translation info + access control
 
+== Legacy 32-bit 장치 지원 ==
+
+32-bit 장치는 4 GB 위 PA를 못 봄. IOMMU 없으면 ['''bounce buffer''']로 한번 더 복사 필요.
+IOMMU가 있으면 device가 자기 IOVA 공간 그대로 쓰면 IOMMU가 host PA의 임의 영역으로 매핑 → bounce buffer 불필요 = '''legacy support의 핵심 의미'''.
+
 == CPU MMU vs IOMMU ==
 
 {| class="table"
@@ -2384,7 +2646,7 @@ DMA는 '''virtual address'''를 사용한다. 이유:
 |-
 | 누구를 위해 || CPU || DMA-supported devices
 |-
-| 변환 || VA → PA || IOVA → PA
+| 변환 || VA → PA || '''IOVA → PA''' ★
 |-
 | TLB || I-TLB, D-TLB, STLB || '''IOTLB'''
 |-
@@ -2393,9 +2655,11 @@ DMA는 '''virtual address'''를 사용한다. 이유:
 
 == 같이 보기 ==
 * [[DMA]]
+* [[DMA Pinning]]
 * [[MMU]]
 * [[가상 메모리]]
 * [[TLB]]
+* [[자주 틀리는 함정 모음]]
 `
 },
 
@@ -2429,14 +2693,28 @@ MMIO LD/ST는 device에 '''의도하지 않은 동작''' 유발 가능.
 
 == Caching 금지 ==
 
-MMIO 영역은 [[캐시]]되면 안 됨:
-* Cache 값 업데이트 → 진짜 device에 안 전달 (cache는 CPU 쪽)
-* LD가 cache hit → 진짜 device read 안 함
+{warn}'''핵심 원리''': Cache는 '''PA만 보고''' 캐싱한다. 그 PA 뒤가 메모리인지 device인지 구분 메커니즘 자체가 '''없음'''. → MMIO도 default로 캐싱된다. UC로 명시 매핑하지 않으면 자동 캐싱됨.{/warn}
+
+MMIO 영역이 cache되면 발생하는 문제:
+* '''ST → L1 도달''' 만으로 device가 봤다고 착각 → 실제는 dirty line으로 들고 있다가 eviction 시점에야 device 도달
+* 예: "GPU START 비트 썼는데 GPU가 시작 안 함" 같은 버그
+* LD cache hit → 진짜 device read 안 함 → stale 값
+* Write-through cache도 부족 — L1→L2→L3 지연 + bus reordering 문제
 
 '''해결 3가지''':
-# **<code>clflush</code>**: 명시적 cache line flush
-# **Non-temporal 명령어** (e.g., x86 <code>MOVNT</code>): cache 우회
-# **PTE uncacheable 플래그**: 페이지 단위 cache 금지 (보통 OS가 자동 설정)
+# **<code>clflush</code>**: 특정 cache line 강제 eviction
+# **Non-temporal store** (e.g., x86 <code>MOVNTI</code>): cache 우회 bus 직행
+# **PTE uncacheable 플래그**: '''페이지 단위 cache 금지''' (보통 OS가 MMIO 매핑 시 자동 설정 — 가장 깔끔)
+
+== Bus Address Decoding ==
+
+bus의 각 장치(메인 메모리 컨트롤러, GPU, NIC...)는 '''"내 담당 주소 범위"'''가 미리 설정 (BIOS/UEFI의 BAR). CPU가 LD/ST 발사하면 모든 장치가 주소 보고 자기 범위면 응답, 아니면 무시. 일반 LD/ST가 device에 도달하는 게 이 decoding 덕분.
+
+== User Mode 가능 ==
+
+MMIO는 일반 LD/ST → '''user mode에서도 발사 가능''' (privileged 아님). 보안은 '''page table 매핑 여부'''로 처리 — OS가 user page table에 매핑 안 하면 page fault로 차단. 의도적으로 매핑하면 user-mode 직접 access 가능 (예: GPU command queue user mapping).
+
+[[PIO]]와 대조: IN/OUT은 privileged → kernel만.
 
 == MMIO vs PIO 비교 ==
 
@@ -3194,14 +3472,39 @@ AMAT = Hit Time + Miss Rate × Miss Penalty
 AMAT_L1 = HitTime_L1 + MR_L1 × (HitTime_L2 + MR_L2 × MissPenalty_L2)
 </pre>
 
+== 계산 예제 ⭐ ==
+
+기본 예제 (Q2 풀이):
+<pre>
+hit = 1 cycle, miss rate = 5%, miss penalty = 100 cycles
+→ AMAT = 1 + 0.05 × 100 = 6 cycles
+</pre>
+
+ns ↔ cycle 환산:
+* 100 ns DRAM @ 1 GHz = 100 cycles
+* 180 cycles @ 3.6 GHz = 50 ns (p.15 P4 예제)
+
+다중 레벨 예제:
+<pre>
+HitTime_L1=1, MR_L1=5%, HitTime_L2=10, MR_L2=20%, Penalty_L2=200
+→ AMAT = 1 + 0.05 × (10 + 0.20 × 200) = 1 + 0.05 × 50 = 3.5 cycles
+</pre>
+
+== DRAM이 느린 이유 ==
+# '''1T1C charge/discharge''' (p.6) — capacitor 저장/방전 본질적 지연
+# '''벤더 latency 거의 안 개선''' — 1999→2017 1.3배 (대역폭은 비약적, latency는 정체)
+# '''Off-chip 경로''' — physical wire 길이
+
 == 최적화 방향 ==
 * Hit Time ↓ → 작은 L1, 단순 매핑
 * Miss Rate ↓ → 큰 cache / set-assoc / prefetch
-* Miss Penalty ↓ → L2/L3 추가, write buffer
+* Miss Penalty ↓ → L2/L3 추가, [[Write Buffer]]
 
 == 같이 보기 ==
 * [[캐시]]
 * [[지역성]]
+* [[MSHR]]
+* [[자주 틀리는 함정 모음]]
 `
 },
 
@@ -3480,6 +3783,455 @@ Cache 크기 ≤ Associativity × Page 크기
 * [[ch13 IO]]
 * [[DMA]]
 `
+},
+
+// ----------------------------------------------------------------
+// 시험 직전 review용 추가 stub들 (2026-06-05 ~)
+// 학생이 quiz/모의시험에서 헷갈렸던 부분을 detail article로 분리
+// ----------------------------------------------------------------
+
+"Page Cache": {
+  title: "Page Cache (OS file cache)",
+  category: ["IO", "메모리 시스템"],
+  body: `
+'''Page Cache'''는 OS kernel이 main memory(DRAM) 일부를 떼서 만든 '''software cache'''이다. file 내용을 [[가상 메모리|page]] 단위(4 KB)로 캐싱.
+
+{warn}'''이름 함정 ★''': ch11의 cache (block/line, 64B, HW)와 '''완전 다름'''. ch13 page cache는 SW이며 단위는 VM page와 같다.{/warn}
+
+== L1/L2/L3 vs Page Cache ==
+
+{| class="table"
+! || L1/L2/L3 || Page Cache
+|-
+| 관리 주체 || HW || OS (kernel)
+|-
+| 위치 || CPU chip || DRAM 일부
+|-
+| 단위 || block/line (보통 64B) || page (4KB)
+|-
+| 정책 || HW (LRU/FIFO 회로) || OS (clock 등)
+|-
+| 공유 || 코어 간 || '''모든 process 공유'''
+|}
+
+== Flow ==
+
+* <code>read()</code> → page cache 먼저 → hit: RAM 복사 / miss: disk 갔다 채움
+* <code>write()</code> → page cache에 먼저 → 나중에 disk flush (write-back)
+
+== mmap과의 관계 ==
+
+[[mmap]]은 page cache page를 user에게 '''직접 노출하는 인터페이스'''. 둘 다 같은 RAM의 page cache를 사용.
+
+* read() vs mmap() — page cache 관점:
+  - '''read()''': page cache → user buf로 '''복사''' (syscall + copy)
+  - '''mmap()''': page cache page를 '''page table에 직접 매핑''' (syscall 1번 + zero-copy)
+* 두 process가 같은 file mmap → 같은 page cache page 공유 (예: libc.so가 모든 process에 RAM 1벌)
+
+== 사촌 정리 (이름 비슷함) ==
+
+* '''TLB''': VPN → PFN 매핑 캐시 (HW, MMU 내부)
+* '''PWC''' (Page Walk Cache): 중간 PT entry 캐시 (HW, MMU 보조)
+* '''Page Cache''': file 내용 캐시 (SW, OS 관리) ← 이것만 SW
+
+== 같이 보기 ==
+* [[mmap]]
+* [[Demand paging]]
+* [[ch13 IO]]
+* [[자주 틀리는 함정 모음]]
+`
+},
+
+"MSHR": {
+  title: "MSHR (Miss Status Holding Register)",
+  category: ["메모리 시스템"],
+  body: `
+'''MSHR'''(Miss Status Holding Register) = '''현재 fetch 중인 outstanding miss들의 명단표'''. Non-blocking cache 핵심 컴포넌트.
+
+{warn}MSHR은 '''miss 전용'''. Hit과 무관. Blocking cache에는 필요 없음 (stall로 처리).{/warn}
+
+== Primary vs Secondary Miss ==
+
+* '''Primary miss''': MSHR entry '''신규 할당''' + memory fetch 발사
+* '''Secondary miss''': 같은 block에 이미 in-flight miss 있음 → '''기존 entry의 subentries에 merge''' → fetch 안 함
+
+→ memory bus 트래픽을 1번으로 절약.
+
+== MSHR Entry 구조 ==
+
+<pre>
+[ block address | valid | subentries (word offset + dest register) ... ]
+</pre>
+
+== Non-blocking Cache의 in-flight block ==
+
+학생 혼동: "t=0에 fetch 발사하면 t=1,2엔 이미 cache에 있는 거 아냐?" → '''틀림. memory latency 100+ cycle.'''
+
+* '''Blocking cache''': t=0 stall → 100 cycle 후 block 도착 → t=1,2 hit ✅ MSHR 불필요
+* '''Non-blocking cache''': t=0 fetch 발사 + CPU 계속 진행 → t=1,2엔 block 아직 안 옴 → 또 MISS → '''MSHR이 중복 fetch 방지'''
+
+현대 OoO/superscalar CPU = non-blocking 필수 → MSHR 필수.
+
+"in-flight" = "요청은 갔지만 응답 안 옴" 상태. 이 동안 같은 block에 대한 후속 miss = secondary miss.
+
+== MSHR vs Write Buffer 구분 ★ ==
+
+{| class="table"
+! || MSHR || [[Write Buffer]]
+|-
+| 대상 || Load miss || Store
+|-
+| 용도 || Non-blocking 필수 || WT cache의 store stall 완화
+|-
+| 합치기 || Merging (요청자 목록) || Coalescing (store 데이터)
+|}
+
+== 같이 보기 ==
+* [[Write Buffer]]
+* [[캐시]]
+* [[비순차 실행]]
+* [[자주 틀리는 함정 모음]]
+`
+},
+
+"Write Buffer": {
+  title: "Write Buffer (Store Queue)",
+  category: ["메모리 시스템"],
+  body: `
+'''Write Buffer''' = store 명령어를 임시 보관하는 작은 FIFO. WT cache의 store stall 폭발을 해결하는 핵심 보조구조.
+
+== 동작 ==
+
+* '''작은 FIFO''' (유한 — 가득 차면 CPU stall)
+* '''Background drain''': memory bus가 한가할 때 자동 비움
+* '''Coalescing''': 같은 line에 대한 연속 store 병합 가능 (strict order는 깨질 수 있음)
+* "exclusive to WB" 함정: 오히려 '''WT가 주된 용도'''. WB cache는 eviction buffer로 별도 사용.
+
+== WT vs WB Cache ==
+
+* '''WT (Write-Through)''': 매 store마다 memory 도달 → memory stall 폭발 → '''Write Buffer 필수'''
+* '''WB (Write-Back)''': cache에 dirty로 유지 + eviction 시에만 memory → store stall 적음
+
+== Write Buffer ≠ MSHR ★ ==
+
+* '''Write Buffer''': store 데이터 합침 ('''Coalescing''')
+* '''[[MSHR]]''': load 요청자 목록 합침 ('''Merging''')
+
+이 두 개는 자주 헷갈리니 구분 필수.
+
+== 같이 보기 ==
+* [[MSHR]]
+* [[캐시]]
+* [[자주 틀리는 함정 모음]]
+`
+},
+
+"DMA Pinning": {
+  title: "DMA Memory Pinning",
+  category: ["IO"],
+  body: `
+'''DMA Pinning''' = DMA가 사용할 메모리 page를 '''swap out 금지'''로 표시.
+
+{warn}'''핵심 이유''': device는 OS가 swap한 걸 모르고, '''page fault로 멈출 수도 없다'''.{/warn}
+
+== 왜 필수인가 ==
+
+[[Demand paging]]은 RAM 부족 시 page를 disk로 swap한다. 만약 DMA region이 swap out 되면:
+
+* Device는 옛 PA에 그대로 transfer → '''무관 메모리 corruption'''
+* Device는 CPU처럼 page fault로 멈출 수 없음 — burst 단위 transfer 진행 중 abort 불가
+* [[IOMMU]]에도 re-fault 능력 없음
+
+→ DMA region은 무조건 pinning 필요.
+
+== Swap 허용하려면? ==
+
+* Presentness tracking + CPU TLB·IOTLB coherence + inter-device sync + in-flight transfer 처리
+* '''Enormous complexity''' — 기존 CPU mechanism (instruction 단위 fault)으로 안 됨
+* 그래서 모든 실용 시스템은 그냥 pinning 사용
+
+== 실제 사용처 (자주 씀 ★) ==
+
+* '''CUDA''': <code>cudaMallocHost()</code> / <code>cudaHostAlloc()</code> — pinned host memory
+* '''DPDK''': high-performance networking 모든 buffer
+* '''RDMA / InfiniBand''': memory region 등록 시 pin 필수
+* '''Linux user-level''': <code>mlock()</code>
+* '''Linux kernel''': <code>mm_mpin()</code>
+
+== 함정 ==
+
+{warn}"pinning은 거의 안 쓴다" → 거짓. CUDA/DPDK/RDMA 모두 핵심 API.{/warn}
+
+== 같이 보기 ==
+* [[DMA]]
+* [[IOMMU]]
+* [[Demand paging]]
+* [[자주 틀리는 함정 모음]]
+`
+},
+
+"AHB Transfer": {
+  title: "AHB Transfer (Address+Data Phase)",
+  category: ["IO"],
+  body: `
+[[AMBA]] AHB의 transfer는 '''Address Phase + Data Phase''' 2단계가 1 cycle 오프셋으로 pipelined.
+
+== Pipelined 2-phase ==
+
+* 다음 transfer의 ADDR phase = 현재 transfer의 DATA phase와 같은 cycle
+* Throughput = 1 transfer/cycle (이상적)
+
+[[img:io_ahb-29.png|Address phase와 Data phase가 다른 transaction끼리 겹침|medium]]
+
+== HREADY 신호 ★ ==
+
+Slave의 ready/busy 표시.
+
+* '''HREADY = HIGH''': 진행
+* '''HREADY = LOW''': slave busy → '''master는 신호 유지 의무''' → 다음 transaction의 address phase 연장
+
+{warn}함정: "HREADY LOW 시 master가 자유롭게 signal 변경" → 거짓. 유지가 의무.{/warn}
+
+[[img:io_ahb-30.png|Slave busy 시 HREADYOUT LOW → master 다음 transaction address phase 연장|medium]]
+
+== Burst 제어 3종 ==
+
+이름 첫 글자로 기억:
+
+{| class="table"
+! 신호 || 의미 || 값
+|-
+| H'''B'''URST || '''B'''urst 길이 || SINGLE, INCR, INCR4/8/16, WRAP4/8/16
+|-
+| H'''S'''IZE || beat '''S'''ize || Byte/Halfword/Word/Doubleword
+|-
+| H'''T'''RANS || cycle '''T'''rans status || NONSEQ(첫번째) / SEQ(이어지는) / BUSY(잠시멈춤) / IDLE
+|}
+
+== INCR vs WRAP ==
+
+* '''INCR4''': 단순 증가 (0x38 → 0x3C → 0x40 → 0x44)
+* '''WRAP4''': cache line 안에서 wrap-around — 시작 0x38, 32-bit beat → 16B boundary 안 wrap → '''0x38 → 0x3C → 0x30 → 0x34''' (critical-word-first 로딩)
+
+== Multi-master ==
+
+여러 master 있으면 '''Interconnect + Arbiter 필수'''. 없으면 wire driving electrical 충돌.
+
+{warn}함정: "slaves가 first-come-first-served로 해결" → 거짓. Arbiter가 master 측에서 조정.{/warn}
+
+== 같이 보기 ==
+* [[AMBA]]
+* [[ch13 IO]]
+* [[자주 틀리는 함정 모음]]
+`
+},
+
+"FIFO Side Effect": {
+  title: "FIFO MMIO Side Effect",
+  category: ["IO"],
+  body: `
+[[MMIO]]의 가장 textbook적인 side effect 예시 = '''FIFO device register'''.
+
+== Side Effect 정의 ==
+
+Programmer가 명시적으로 건드리지 않은 state가 '''한 번의 LD/ST 때문에 바뀜'''.
+
+일반 메모리는 멱등(idempotent): 같은 주소 2회 read = 같은 값, 다른 state 안 바뀜. '''MMIO는 이 가정을 깸.'''
+
+== FIFO 구조 ==
+
+외부 인터페이스는 데이터 주소 1개뿐인데, 내부엔 buffer + head_ptr + tail_ptr 전체가 숨어 있음.
+
+* <code>ST r1, FIFO_DATA</code> → buffer[tail]=r1, '''tail++ (자동)'''
+* <code>LD r1, FIFO_DATA</code> → r1=buffer[head], '''head++ (자동)'''
+
+== 왜 위험 ==
+
+* 컴파일러가 LD 2번 → pop 2번 → '''데이터 손실'''
+* LD 제거 (dead code elimination) → '''큐 안 비워짐'''
+* Speculative load → 잘못된 pop
+* Cache hit → '''stale data 반환''' (실제 FIFO는 안 비워짐)
+
+== 대응 ==
+
+* <code>volatile</code> 키워드 — 컴파일러 최적화 금지
+* '''Uncacheable PTE''' (가장 깔끔)
+* <code>clflush</code> — 명시적 line 제거
+* '''Non-temporal store''' (MOVNTI) — cache 우회
+* Speculative load 차단
+
+== 모든 MMIO가 side effect 있는 건 아님 ==
+
+* '''Status reg''' (READY 비트): 없음 — 단순 read만
+* '''Control reg''' (BAUD 설정): 없음 — 단순 write만
+* '''FIFO''': 한 주소에 큐 자료구조 통째 → 가장 깔끔한 textbook 예시
+
+== 같이 보기 ==
+* [[MMIO]]
+* [[ch13 IO]]
+* [[자주 틀리는 함정 모음]]
+`
+},
+
+"Synonym": {
+  title: "Synonym (VIVT 함정)",
+  category: ["메모리 시스템"],
+  body: `
+'''Synonym''' = '''다른 [[가상 메모리|VA]] → 같은 [[PA]]''' 매핑이 여러 개 존재하는 상황.
+
+{warn}'''[[Homonym]]과 헷갈리지 말 것''' ★★. 둘은 정확히 반대 개념.{/warn}
+
+== 발생 시나리오 ==
+
+* 공유 라이브러리 (libc.so 등)
+* IPC shared memory
+* mmap된 file을 여러 process가 같이 매핑
+* fork() 후 copy-on-write 페이지
+
+== 왜 문제 ==
+
+[[VIVT]] cache가 VA로 indexing/tagging하니까 같은 PA가 '''여러 cache line으로 중복''' 들어감 → 한 쪽에서 수정하면 다른 쪽은 stale → coherence 깨짐.
+
+== 해결 ==
+
+* '''[[VIPT]] cache''': Index를 page offset 안에 두면 같은 PA는 항상 같은 set → 중복 회피. 단 '''Cache 크기 ≤ Associativity × Page 크기''' 제약.
+* '''[[PIPT]] cache''': PA로 indexing/tagging → 본질적으로 synonym 없음. 단 TLB 변환 후 indexing이라 latency 손해.
+* OS 기법: '''Page coloring''' — synonym page들의 VA를 같은 cache color로 강제 할당.
+
+== Homonym과 차이 ==
+
+{| class="table"
+! || Synonym || [[Homonym]]
+|-
+| 방향 || 다른 VA → 같은 PA || 같은 VA → 다른 PA
+|-
+| 발생 || 공유 메모리 || 다른 process (context switch)
+|-
+| 해결 || VIPT 제약 / Page coloring || [[ASID]] (HW), context switch 시 TLB flush
+|}
+
+== 같이 보기 ==
+* [[Homonym]]
+* [[VIVT]]
+* [[VIPT]]
+* [[PIPT]]
+* [[가상 메모리]]
+* [[자주 틀리는 함정 모음]]
+`
+},
+
+"Homonym": {
+  title: "Homonym (VIVT 함정)",
+  category: ["메모리 시스템"],
+  body: `
+'''Homonym''' = '''같은 [[가상 메모리|VA]] → 다른 [[PA]]''' 매핑. 다른 process들이 자기 VAS에서 같은 가상 주소를 쓰는 상황.
+
+{warn}'''[[Synonym]]과 헷갈리지 말 것''' ★★. 둘은 정확히 반대 개념.{/warn}
+
+== 발생 시나리오 ==
+
+* 모든 process는 자기 VAS를 0번부터 갖는다 (예: 모든 process의 stack은 0x7FFF... 근처)
+* Context switch 후 같은 VA가 다른 process의 다른 PA를 가리킴
+
+== 왜 문제 ==
+
+[[VIVT]] cache가 VA로 tagging하니까 process A의 cache line을 process B가 '''hit으로 잘못 인식''' → 보안 사고.
+
+== 해결 ==
+
+* '''[[ASID]]''' (Address Space ID): VIVT cache tag에 PID/ASID 추가 → process 식별
+* '''Context switch 시 TLB flush''' (구식, 비쌈)
+* [[PIPT]] / [[VIPT]] cache 사용
+
+== Synonym과 차이 ==
+
+자세한 비교는 [[Synonym]] 문서.
+
+핵심:
+* Homonym = 같은 VA → 다른 PA → '''ASID''' 해결
+* Synonym = 다른 VA → 같은 PA → '''VIPT''' 해결
+
+== 같이 보기 ==
+* [[Synonym]]
+* [[VIVT]]
+* [[VIPT]]
+* [[ASID]]
+* [[가상 메모리]]
+* [[자주 틀리는 함정 모음]]
+`
+},
+
+"ASID": {
+  title: "ASID (Address Space ID)",
+  category: ["메모리 시스템"],
+  body: `
+'''ASID'''(Address Space ID) = TLB/cache entry에 붙는 process 식별자. Context switch 시 TLB flush 없이 [[Homonym]] 문제 해결.
+
+== 동작 ==
+
+* TLB entry: <code>[VA, PFN, ASID, ...]</code>
+* TLB lookup: VA 일치 + '''ASID 일치''' 시에만 hit
+* Context switch: CPU의 ASID 레지스터만 갱신 (TLB flush 불필요)
+
+== 효과 ==
+
+* Context switch 비용 ↓ (TLB flush 회피)
+* 여러 process의 TLB entry가 한 TLB에 공존 가능
+
+== 한계 ==
+
+{warn}'''ASID는 Homonym만 해결''' — [[Synonym]]은 해결 못 함. (Synonym은 같은 PA가 여러 VA에 매핑된 거라 ASID와 무관.){/warn}
+
+== 같이 보기 ==
+* [[Homonym]]
+* [[Synonym]]
+* [[TLB]]
+* [[가상 메모리]]
+* [[자주 틀리는 함정 모음]]
+`
+},
+
+"HPT 계산": {
+  title: "HPT Walk Cost 계산",
+  category: ["메모리 시스템"],
+  body: `
+[[가상 메모리|Hierarchical Page Table]] walk 비용 계산.
+
+== x86-64 4-level HPT ==
+
+<pre>
+PML4 → PDPT → PD → PT → 실데이터
+</pre>
+
+총 '''5번 메모리 access''' (PT walk 4번 + 실데이터 1번).
+
+== 단순 계산 ==
+
+* DRAM latency = 100 ns 가정
+* TLB miss + PWC miss + 실제 walk → 4 × 100 ns = '''400 ns'''
+* CPU 입장에선 4 GHz면 1600 cycle stall
+
+== 그래서 TLB가 죽도록 중요 ==
+
+* TLB hit rate 99%+ 필수
+* 만약 TLB miss rate 1% + walk 400 ns + hit 1 cycle (0.25 ns):
+  - AMAT_translate ≈ 0.99 × 0.25 + 0.01 × 400 ≈ 4.25 ns
+  - hit 1.7배 + miss 1600배 → miss가 전체 비용 지배
+
+== HPT 자원 오버헤드 ==
+
+x86-64 PT 단계당 9 bit → 각 단계 512 entry, entry당 8 B = 4 KB/page-table-page.
+
+* '''Sparse VAS''': 8 KB ~ 수십 KB (대부분 비어있어서)
+* '''Dense VAS''': 2.4 MB까지 (full 매핑)
+* VMM 정책에 따라 8 KB ↔ 2.4 MB 변동
+
+== 같이 보기 ==
+* [[가상 메모리]]
+* [[TLB]]
+* [[자주 틀리는 함정 모음]]
+* [[AMAT]]
+`
 }
 
 };
@@ -3489,12 +4241,12 @@ Cache 크기 ≤ Associativity × Page 크기
 const NAV_ORDER = [
   { group: "📌 시작하기", items: ["main", "FAQ", "자주 틀리는 함정 모음"] },
   { group: "📐 RECAP", items: ["성능 지표"] },
-  { group: "🔧 ISA / MIPS", items: ["MIPS", "명령어 포맷", "함수 호출 규약"] },
+  { group: "🔧 ISA / MIPS", items: ["MIPS", "명령어 포맷", "함수 호출 규약", "Branch 주소 계산", "Jump 주소 계산"] },
   { group: "🚂 파이프라인", items: ["파이프라인 예외", "Load-Use 해저드"] },
-  { group: "⚡ 고급 마이크로아키텍처", items: ["비순차 실행", "슈퍼스칼라"] },
+  { group: "⚡ 고급 마이크로아키텍처", items: ["비순차 실행", "슈퍼스칼라", "ROB", "ISQ", "LSQ"] },
   { group: "🧵 병렬성", items: ["멀티스레딩", "VLIW", "ILP와 TLP", "CMP"] },
-  { group: "💾 메모리 시스템", items: ["캐시", "MSI 프로토콜", "가상 메모리", "TLB"] },
-  { group: "🔌 IO (ch13)", items: ["ch13 IO", "CPU-IO Interaction", "PIO", "MMIO", "mmap", "DMA", "IOMMU", "Doorbell", "AMBA"] },
+  { group: "💾 메모리 시스템", items: ["캐시", "AMAT", "MSHR", "Write Buffer", "MSI 프로토콜", "가상 메모리", "TLB", "PIPT", "VIVT", "VIPT", "Synonym", "Homonym", "ASID", "HPT 계산"] },
+  { group: "🔌 IO (ch13)", items: ["ch13 IO", "CPU-IO Interaction", "PIO", "MMIO", "FIFO Side Effect", "Page Cache", "mmap", "DMA", "DMA Pinning", "IOMMU", "Doorbell", "AMBA", "AHB Transfer"] },
 ];
 
 // ============================================================
